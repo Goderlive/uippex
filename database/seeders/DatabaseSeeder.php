@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $tenantId = tenant('id') ?? 'localhost';
-        
+
         $this->call([
-            RolesSeeder::class,
+            // RolesSeeder::class,
         ]);
 
         $admin = User::updateOrCreate(
