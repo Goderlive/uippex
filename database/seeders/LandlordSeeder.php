@@ -22,9 +22,9 @@ class LandlordSeeder extends Seeder
             );
 
             $tenant->domains()->updateOrCreate(
-                ['domain' => 'calimaya.localhost']
+                ['domain' => 'calimaya.uippex.com']
             );
-            
+
             $this->command->info('Tenant Calimaya created successfully!');
         } catch (\Exception $e) {
             $this->command->error('Error creating tenant: ' . $e->getMessage());

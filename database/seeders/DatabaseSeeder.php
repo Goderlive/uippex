@@ -20,15 +20,5 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // RolesSeeder::class,
         ]);
-
-        $admin = User::updateOrCreate(
-            ['email' => "admin@{$tenantId}.uippe.mx"],
-            [
-                'name' => 'Administrador ' . ucfirst($tenantId),
-                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
-            ]
-        );
-
-        $admin->assignRole('Super-Admin');
     }
 }
