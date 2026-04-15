@@ -28,3 +28,4 @@ routes/premium.php
 app/Http/Controllers/Tenant/PremiumOnboarding/*
 app/Services/Premium/
 storage/import_files/
+app/Http/Controllers/Tenant/Premium/ImporterTXTController.php
