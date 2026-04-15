@@ -61,6 +61,21 @@ Route::middleware([
             Route::post('/progreso-validar/{report}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'validateProgress'])->name('activities.progress.validate');
         });
 
+        // Ajustes (Role: Super-Admin & PMD-Planeación)
+        Route::middleware(['role:Super-Admin|PMD-Planeación'])->prefix('ajustes')->group(function () {
+            Route::prefix('dependencias')->name('departments.')->group(function () {
+                Route::get('/', [App\Http\Controllers\Tenant\DepartmentController::class, 'index'])->name('index');
+                Route::post('/', [App\Http\Controllers\Tenant\DepartmentController::class, 'store'])->name('store');
+                Route::put('/{department}', [App\Http\Controllers\Tenant\DepartmentController::class, 'update'])->name('update');
+                Route::delete('/{department}', [App\Http\Controllers\Tenant\DepartmentController::class, 'destroy'])->name('destroy');
+            });
+            
+            Route::prefix('areas')->name('areas.')->group(function () {
+                Route::put('/{area}', [App\Http\Controllers\Tenant\DepartmentController::class, 'updateArea'])->name('update');
+                Route::post('/{area}/move', [App\Http\Controllers\Tenant\DepartmentController::class, 'moveArea'])->name('move');
+            });
+        });
+
         // Reconducciones OSFEM
         Route::prefix('reconducciones')->name('reconductions.')->group(function () {
             Route::get('/', [App\Http\Controllers\Tenant\ReconductionController::class, 'index'])->name('index');

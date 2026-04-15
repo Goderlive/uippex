@@ -23,25 +23,98 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex z-50">
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
                                 >
                                     Dashboard
                                 </NavLink>
+                                <div className="hidden sm:flex sm:items-center">
+                                    <div className="relative">
+                                        <Dropdown>
+                                            <Dropdown.Trigger>
+                                                <span className="inline-flex rounded-md h-full items-center">
+                                                    <button
+                                                        type="button"
+                                                        className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none h-[64px] ${
+                                                            route().current('activities.*') || route().current('reconductions.*')
+                                                                ? 'border-indigo-400 text-gray-900 dark:border-indigo-600 dark:text-gray-100'
+                                                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-300'
+                                                        }`}
+                                                    >
+                                                        Actividades
+                                                        <svg
+                                                            className="-me-0.5 ms-2 h-4 w-4"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 20 20"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            </Dropdown.Trigger>
+
+                                            <Dropdown.Content>
+                                                <Dropdown.Link href={route('activities.index')}>
+                                                    {user.roles?.some(r => r.name === 'Super-Admin' || r.name === 'PMD-Planeación') ? 'Ver los avances' : 'Reportar'}
+                                                </Dropdown.Link>
+                                                <Dropdown.Link href={route('reconductions.index')}>
+                                                    Reconducciones
+                                                </Dropdown.Link>
+                                            </Dropdown.Content>
+                                        </Dropdown>
+                                    </div>
+                                </div>
                                 <NavLink
-                                    href={route('activities.index')}
-                                    active={route().current('activities.*')}
+                                    href="#"
+                                    active={false}
                                 >
-                                    Actividades
+                                    Indicadores
                                 </NavLink>
-                                <NavLink
-                                    href={route('reconductions.index')}
-                                    active={route().current('reconductions.*')}
-                                >
-                                    Reconducciones PBR
-                                </NavLink>
+                                <div className="hidden sm:flex sm:items-center">
+                                    <div className="relative">
+                                        <Dropdown>
+                                            <Dropdown.Trigger>
+                                                <span className="inline-flex rounded-md h-full items-center">
+                                                    <button
+                                                        type="button"
+                                                        className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none h-[64px] ${
+                                                            route().current('departments.*')
+                                                                ? 'border-indigo-400 text-gray-900 dark:border-indigo-600 dark:text-gray-100'
+                                                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-300'
+                                                        }`}
+                                                    >
+                                                        Ajustes
+                                                        <svg
+                                                            className="-me-0.5 ms-2 h-4 w-4"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 20 20"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            </Dropdown.Trigger>
+
+                                            <Dropdown.Content>
+                                                <Dropdown.Link href={route('departments.index') ?? '#'}>
+                                                    Dependencias
+                                                </Dropdown.Link>
+                                            </Dropdown.Content>
+                                        </Dropdown>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -151,11 +224,35 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <div className="pt-2 pb-1 border-t border-gray-200 dark:border-gray-600 mt-2 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4">
+                            Actividades
+                        </div>
                         <ResponsiveNavLink
                             href={route('activities.index')}
                             active={route().current('activities.*')}
                         >
-                            Actividades
+                            {user.roles?.some(r => r.name === 'Super-Admin' || r.name === 'PMD-Planeación') ? 'Ver los avances' : 'Reportar'}
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('reconductions.index')}
+                            active={route().current('reconductions.*')}
+                        >
+                            Reconducciones
+                        </ResponsiveNavLink>
+                        <div className="pt-2 pb-1 border-t border-gray-200 dark:border-gray-600 mt-2 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4">
+                            Nuevas Secciones
+                        </div>
+                        <ResponsiveNavLink
+                            href="#"
+                            active={false}
+                        >
+                            Indicadores
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('departments.index') ?? '#'}
+                            active={route().current('departments.*')}
+                        >
+                            Ajustes: Dependencias
                         </ResponsiveNavLink>
                     </div>
 
