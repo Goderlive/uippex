@@ -1,4 +1,19 @@
+import { usePage } from '@inertiajs/react';
+
 export default function ApplicationLogo(props) {
+    const { municipal_config } = usePage().props;
+
+    if (municipal_config?.logo_url) {
+        return (
+            <img 
+                src={municipal_config.logo_url} 
+                alt={municipal_config.official_name || "Logo Institucional"} 
+                {...props} 
+                style={{ objectFit: 'contain' }}
+            />
+        );
+    }
+
     return (
         <svg
             {...props}

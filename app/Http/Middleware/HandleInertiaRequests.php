@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\MunicipalConfiguration;
+use Illuminate\Support\Facades\Storage;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,6 +31,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $municipalConfig = null;
+        if (function_exists('tenant') && tenant()) {
+            $config = MunicipalConfiguration::getSettings();
+            $municipalConfig = [
+                'official_name' => $config->official_name,
+                'administration_period' => $config->administration_period,
+                'primary_color' => $config->primary_color,
+                'logo_url' => $config->logo_path ? Storage::url($config->logo_path) : null,
+                'shield_url' => $config->shield_path ? Storage::url($config->shield_path) : null,
+            ];
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -37,6 +51,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'message' => fn () => $request->session()->get('message')
             ],
+            'municipal_config' => $municipalConfig,
         ];
     }
 }

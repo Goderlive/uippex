@@ -61,6 +61,12 @@ Route::middleware([
             Route::post('/progreso-validar/{report}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'validateProgress'])->name('activities.progress.validate');
         });
 
+        // Ajustes Exclusivos (Role: Super-Admin)
+        Route::middleware(['role:Super-Admin'])->prefix('ajustes/premium')->name('premium.')->group(function () {
+            Route::get('/configuracion', [App\Http\Controllers\Tenant\MunicipalConfigurationController::class, 'edit'])->name('configuration.edit');
+            Route::post('/configuracion', [App\Http\Controllers\Tenant\MunicipalConfigurationController::class, 'update'])->name('configuration.update');
+        });
+
         // Ajustes (Role: Super-Admin & PMD-Planeación)
         Route::middleware(['role:Super-Admin|PMD-Planeación'])->prefix('ajustes')->group(function () {
             Route::prefix('dependencias')->name('departments.')->group(function () {
