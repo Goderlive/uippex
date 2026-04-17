@@ -16,8 +16,8 @@ class MunicipalConfigurationController extends Controller
         
         return Inertia::render('Premium/Configuration', [
             'settings' => $settings,
-            'logo_url' => $settings->logo_path ? Storage::url($settings->logo_path) : null,
-            'shield_url' => $settings->shield_path ? Storage::url($settings->shield_path) : null,
+            'logo_url' => $settings->logo_path ? tenant_asset($settings->logo_path) : null,
+            'shield_url' => $settings->shield_path ? tenant_asset($settings->shield_path) : null,
         ]);
     }
 

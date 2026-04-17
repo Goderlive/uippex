@@ -38,8 +38,8 @@ class HandleInertiaRequests extends Middleware
                 'official_name' => $config->official_name,
                 'administration_period' => $config->administration_period,
                 'primary_color' => $config->primary_color,
-                'logo_url' => $config->logo_path ? Storage::url($config->logo_path) : null,
-                'shield_url' => $config->shield_path ? Storage::url($config->shield_path) : null,
+                'logo_url' => $config->logo_path ? tenant_asset($config->logo_path) : null,
+                'shield_url' => $config->shield_path ? tenant_asset($config->shield_path) : null,
             ];
         }
 
