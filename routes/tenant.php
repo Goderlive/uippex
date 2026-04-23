@@ -99,5 +99,11 @@ Route::middleware([
         });
     });
 
+        // Phase 15: Directorio de Titulares
+        Route::middleware(['role:Super-Admin|PMD-Planeación|Enlace-Dependencia'])->group(function () {
+            Route::get('/directorio', [App\Http\Controllers\Tenant\HolderDirectoryController::class, 'index'])->name('directory.index');
+            Route::post('/directorio/upsert', [App\Http\Controllers\Tenant\HolderDirectoryController::class, 'upsert'])->name('directory.upsert');
+        });
+
     require __DIR__.'/auth.php';
 });

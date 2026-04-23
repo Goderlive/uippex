@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class AdministrativeUnit extends Model
 {
@@ -48,5 +49,10 @@ class AdministrativeUnit extends Model
     public function substantiveActivities()
     {
         return $this->hasMany(SubstantiveActivity::class, 'administrative_unit_id');
+    }
+
+    public function holder(): MorphOne
+    {
+        return $this->morphOne(OfficeHolder::class, 'holdable');
     }
 }

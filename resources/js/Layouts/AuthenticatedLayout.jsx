@@ -85,7 +85,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     <button
                                                         type="button"
                                                         className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none h-[64px] ${
-                                                            route().current('departments.*')
+                                                            route().current('departments.*') || route().current('directory.*')
                                                                 ? 'border-indigo-400 text-gray-900 dark:border-indigo-600 dark:text-gray-100'
                                                                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-300'
                                                         }`}
@@ -110,6 +110,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <Dropdown.Content>
                                                 <Dropdown.Link href={route('departments.index') ?? '#'}>
                                                     Dependencias
+                                                </Dropdown.Link>
+                                                <Dropdown.Link href={route('directory.index')}>
+                                                    Nombres
                                                 </Dropdown.Link>
                                             </Dropdown.Content>
                                         </Dropdown>
@@ -253,6 +256,12 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('departments.*')}
                         >
                             Ajustes: Dependencias
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('directory.index')}
+                            active={route().current('directory.*')}
+                        >
+                            Ajustes: Nombres
                         </ResponsiveNavLink>
                     </div>
 
