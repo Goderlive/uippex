@@ -250,6 +250,7 @@ class ActivityWorkflowController extends Controller
         $monthsArr = $quartersMap[$quarter];
 
         $department = Department::with([
+            'holder',
             'administrativeUnits.substantiveActivities.monthlySchedule',
             'administrativeUnits.substantiveActivities.progressReports' => function($query) use ($monthsArr) {
                 $query->whereIn('month', $monthsArr)->where('status', 1);

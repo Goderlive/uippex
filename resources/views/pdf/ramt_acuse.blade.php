@@ -191,13 +191,28 @@
         @endif
     @endforeach
 
-    <table class="footer-signatures text-center">
+    <table class="footer-signatures text-center" style="width: 100%; table-layout: fixed; margin-top: 50px;">
         <tr>
-            <td width="100%">
+            <td style="width: 50%; vertical-align: top;">
+                @if($department->holder)
+                    <br><br><br>
+                    <div class="footer-line" style="width: 80%;">
+                        <strong>{{ mb_strtoupper($department->holder->academic_degree ?? '') }} {{ mb_strtoupper($department->holder->first_name) }} {{ mb_strtoupper($department->holder->last_name) }}</strong><br>
+                        {{ mb_strtoupper($department->holder->position_title) }}
+                    </div>
+                @else
+                    <br><br><br>
+                    <div class="footer-line" style="width: 80%;">
+                        <strong>TITULAR PENDIENTE DE ASIGNACIÓN</strong><br>
+                        TITULAR DE LA DEPENDENCIA
+                    </div>
+                @endif
+            </td>
+            <td style="width: 50%; vertical-align: top;">
                 <br><br><br>
-                <div class="footer-line">
-                    ENLACE OPERATIVO RESPONSABLE<br>
-                    <strong>{{ mb_strtoupper($user->name) }}</strong>
+                <div class="footer-line" style="width: 80%;">
+                    <strong>{{ mb_strtoupper($user->name) }}</strong><br>
+                    ENLACE OPERATIVO RESPONSABLE
                 </div>
             </td>
         </tr>
