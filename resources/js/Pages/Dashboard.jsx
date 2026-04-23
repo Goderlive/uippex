@@ -2,29 +2,36 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage, Link } from '@inertiajs/react';
 
 export default function Dashboard() {
-    const { tenantId } = usePage().props;
+    const { tenantId, municipal_config } = usePage().props;
+    const primaryColor = municipal_config?.primary_color || '#6366f1'; // fallback to indigo-500
 
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Cockpit Principal PBRM - Municipio: <span className="text-indigo-500 capitalize">{tenantId || 'Desconocido'}</span>
+                    Cockpit Principal PBRM - <span className="capitalize" style={{ color: primaryColor }}>{municipal_config?.official_name || tenantId || 'Desconocido'}</span>
                 </h2>
             }
         >
-            <Head title={`Dashboard - ${tenantId || 'SaaS'}`} />
+            <Head title={`Dashboard - ${municipal_config?.official_name || tenantId || 'SaaS'}`} />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     {/* Welcome Card */}
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 mb-6 border-l-4 border-indigo-500">
+                    <div 
+                        className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 mb-6 border-l-4"
+                        style={{ borderLeftColor: primaryColor }}
+                    >
                         <div className="p-6 text-gray-900 dark:text-gray-100 flex items-center justify-between">
                             <div>
                                 <h3 className="text-lg font-bold">¡Bienvenido al panel centralizado!</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Este es tu entorno protegido y aislado de administración municipal.</p>
                             </div>
                             <div className="text-right">
-                                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                <span 
+                                    className="px-3 py-1 text-xs font-semibold rounded-full bg-opacity-20"
+                                    style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
+                                >
                                     Conexión Segura (Tenant DB)
                                 </span>
                             </div>

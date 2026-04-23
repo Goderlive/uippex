@@ -59,6 +59,9 @@ Route::middleware([
             Route::get('/area/{administrativeUnit}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'showArea'])->name('activities.area.show');
             Route::post('/progreso/{activity}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'storeProgress'])->name('activities.progress.store');
             Route::post('/progreso-validar/{report}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'validateProgress'])->name('activities.progress.validate');
+            
+            // Phase 14.2: Descarga RAMT (Departamental)
+            Route::get('/departamento/ramt-acuse/{quarter}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'downloadRamt'])->name('activities.ramt.download');
         });
 
         // Ajustes Exclusivos (Role: Super-Admin)

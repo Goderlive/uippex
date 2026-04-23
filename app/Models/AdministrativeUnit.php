@@ -44,4 +44,9 @@ class AdministrativeUnit extends Model
     {
         return BudgetProject::where('code', $this->budget_project_code)->first();
     }
+
+    public function substantiveActivities()
+    {
+        return $this->hasMany(SubstantiveActivity::class, 'administrative_unit_id');
+    }
 }

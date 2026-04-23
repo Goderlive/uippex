@@ -34,9 +34,30 @@ class ActivityWorkflowController extends Controller
             $areas = AdministrativeUnit::where('department_id', $user->department_id)->get();
             $dept = Department::find($user->department_id);
             
+            // Phase 14.2: RAMT Multi-Área Departamental Math
+            $ramtCompliance = [1 => false, 2 => false, 3 => false, 4 => false];
+            $totalDepartmentActivities = SubstantiveActivity::whereIn('administrative_unit_id', $areas->pluck('id'))->count();
+            $expectedQuarterTotal = $totalDepartmentActivities * 3;
+
+            if ($expectedQuarterTotal > 0) {
+                $quartersMap = [1 => [1, 2, 3], 2 => [4, 5, 6], 3 => [7, 8, 9], 4 => [10, 11, 12]];
+                foreach ($quartersMap as $q => $monthsArr) {
+                    $validatedCount = \App\Models\MonthlyProgressReport::whereHas('substantiveActivity', function($qBase) use ($areas) {
+                        $qBase->whereIn('administrative_unit_id', $areas->pluck('id'));
+                    })
+                    ->whereIn('month', $monthsArr)
+                    ->where('status', 1)
+                    ->count();
+
+                    $ramtCompliance[$q] = ($validatedCount === $expectedQuarterTotal);
+                }
+            }
+            
             return Inertia::render('Activities/AreaList', [
                 'areas' => $areas,
                 'current_department_name' => $dept ? $dept->name : 'Área Asignada',
+                'ramt_quarters_compliance' => $ramtCompliance,
+                'is_enlace' => $user->hasRole('Enlace-Dependencia'),
             ]);
         }
 
@@ -61,6 +82,8 @@ class ActivityWorkflowController extends Controller
         return Inertia::render('Activities/AreaList', [
             'areas' => $department->administrativeUnits,
             'current_department_name' => $department->name,
+            'ramt_quarters_compliance' => null, // Admins don't generate RAMT
+            'is_enlace' => false,
         ]);
     }
 
@@ -201,5 +224,99 @@ class ActivityWorkflowController extends Controller
             : "Registro rechazado. Se han enviado las observaciones al enlace.";
 
         return redirect()->back()->with('message', $msg);
+    }
+
+    /**
+     * Phase 14.2: PDF Download RAMT (Departamental)
+     */
+    public function downloadRamt(int $quarter)
+    {
+        $user = Auth::user();
+
+        if (!$user->hasRole('Enlace-Dependencia')) {
+            abort(403, 'Acceso denegado: Operación exclusiva para Enlaces de Dependencia.');
+        }
+
+        // Validate quarter limits
+        if ($quarter < 1 || $quarter > 4) {
+            abort(400, 'Cuartil inválido.');
+        }
+
+        $quartersMap = [1 => [1, 2, 3], 2 => [4, 5, 6], 3 => [7, 8, 9], 4 => [10, 11, 12]];
+        $monthPrefixes = [
+            1 => 'jan', 2 => 'feb', 3 => 'mar', 4 => 'apr', 5 => 'may', 6 => 'jun',
+            7 => 'jul', 8 => 'aug', 9 => 'sep', 10 => 'oct', 11 => 'nov', 12 => 'dec'
+        ];
+        $monthsArr = $quartersMap[$quarter];
+
+        $department = Department::with([
+            'administrativeUnits.substantiveActivities.monthlySchedule',
+            'administrativeUnits.substantiveActivities.progressReports' => function($query) use ($monthsArr) {
+                $query->whereIn('month', $monthsArr)->where('status', 1);
+            }
+        ])->find($user->department_id);
+        
+        if (!$department) {
+            abort(403, 'Usuario sin departamento asignado.');
+        }
+
+        // Check if Department has activities mapped
+        $areasIdArray = $department->administrativeUnits->pluck('id');
+        $totalActivities = \App\Models\SubstantiveActivity::whereIn('administrative_unit_id', $areasIdArray)->count();
+        if ($totalActivities === 0) {
+            abort(403, 'No hay metas programadas para generar el RAMT departamental.');
+        }
+
+        // Global accumulators
+        $globalProg = 0;
+        $globalRep = 0;
+
+        foreach ($department->administrativeUnits as $area) {
+            foreach ($area->substantiveActivities as $activity) {
+                $actProg = 0;
+                $actRep = 0;
+
+                if ($activity->monthlySchedule) {
+                    foreach ($monthsArr as $m) {
+                        $col = $monthPrefixes[$m] . '_programmed';
+                        $actProg += (float) $activity->monthlySchedule->$col;
+                    }
+                }
+
+                foreach ($activity->progressReports as $report) {
+                    $actRep += (float) $report->reported_value;
+                }
+
+                $globalProg += $actProg;
+                $globalRep += $actRep;
+
+                if ($actProg == 0) {
+                    $actPercent = 100.00;
+                } else {
+                    $actPercent = ($actRep / $actProg) * 100;
+                }
+
+                $activity->setAttribute('trimestral_compliance_percent', number_format(min($actPercent, 100), 2));
+            }
+        }
+
+        if ($globalProg == 0) {
+            $departmentGlobalPercentage = "100.00";
+        } else {
+            $departmentGlobalPercentage = number_format(min(($globalRep / $globalProg) * 100, 100), 2);
+        }
+
+        $config = \App\Models\MunicipalConfiguration::getSettings();
+
+        // Load PDF using the department relations directly
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ramt_acuse', [
+            'department' => $department,
+            'user' => $user,
+            'quarter' => $quarter,
+            'config' => $config,
+            'department_global_percentage' => $departmentGlobalPercentage
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download("RAMT_Acuse_Tri{$quarter}_".$department->name.".pdf");
     }
 }

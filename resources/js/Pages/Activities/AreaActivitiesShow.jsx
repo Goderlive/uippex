@@ -8,7 +8,7 @@ import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 
-export default function AreaActivitiesShow({ unit, activities, current_month, can_validate }) {
+export default function AreaActivitiesShow({ unit, activities, current_month, can_validate, ramt_quarters_compliance, is_enlace }) {
     const months = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'

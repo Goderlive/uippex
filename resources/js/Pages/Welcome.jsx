@@ -4,13 +4,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     return (
         <>
             <Head title="UIPPEX - Inicio" />
-            
+
             {/* Main Wrapper with Background */}
             <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-950 px-6 py-12 selection:bg-blue-500 selection:text-white">
-                
+
                 {/* Subtle Radial Gradient Background */}
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1)_0%,rgba(2,6,23,1)_100%)] opacity-80" />
-                
+
                 {/* Decorative background elements */}
                 <div className="pointer-events-none absolute -left-20 -top-20 h-96 w-96 rounded-full bg-blue-500/10 blur-[100px]" />
                 <div className="pointer-events-none absolute -right-20 -bottom-20 h-96 w-96 rounded-full bg-teal-500/10 blur-[100px]" />
@@ -52,7 +52,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             UIPPE<span className="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">X</span>
                         </h1>
                         <p className="mt-6 text-xl font-light tracking-wide text-slate-400 sm:text-2xl">
-                            Sistema Integral de Planeación y Gestión Estatal
+                            Sistema para el Control de Información, Planeación, Programación y Evaluación Municipal
                         </p>
                     </header>
 

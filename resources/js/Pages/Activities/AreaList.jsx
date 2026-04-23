@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-export default function AreaList({ areas, current_department_name }) {
+export default function AreaList({ areas, current_department_name, ramt_quarters_compliance, is_enlace }) {
     return (
         <AuthenticatedLayout
             header={
@@ -20,6 +20,45 @@ export default function AreaList({ areas, current_department_name }) {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     
+                    {/* Fase 14.2: Sección Descargas y Constancias Departamentales (RAMT) */}
+                    {is_enlace && ramt_quarters_compliance && (
+                        <div className="mb-8 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-indigo-200 dark:border-indigo-900 border-l-4 border-l-indigo-500">
+                            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-3">
+                                Emitir Constancias Oficiales (Acuses Trimestrales)
+                            </h3>
+                            <div className="flex flex-wrap gap-3">
+                                {[1, 2, 3, 4].map((q) => {
+                                    const isValidated = ramt_quarters_compliance[q];
+                                    return isValidated ? (
+                                        <a
+                                            key={`q-${q}`}
+                                            target="_blank"
+                                            href={route('activities.ramt.download', { quarter: q })}
+                                            className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out shadow-sm"
+                                            title={`Descargar Constancia Departamental Trimestre ${q}`}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Generar RAMT T{q}
+                                        </a>
+                                    ) : (
+                                        <div
+                                            key={`q-${q}`}
+                                            className="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest cursor-not-allowed pointer-events-none"
+                                            title={`Bloqueado: La Dependencia no ha completado el 100% de reportes validados para T${q}.`}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            Bloqueado T{q}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="mb-8 flex items-center justify-between">
                         <Link 
                             href={route('activities.index')}
