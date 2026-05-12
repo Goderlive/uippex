@@ -6,7 +6,9 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const { auth, premiumFeatures } = usePage().props;
+    const user = auth.user;
+    const isAdmin = user.roles?.some(r => r.name === 'Super-Admin');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -114,6 +116,11 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 <Dropdown.Link href={route('directory.index')}>
                                                     Nombres
                                                 </Dropdown.Link>
+                                                {isAdmin && premiumFeatures?.identity && (
+                                                    <Dropdown.Link href={route('premium.configuration.edit')}>
+                                                        Identidad
+                                                    </Dropdown.Link>
+                                                )}
                                             </Dropdown.Content>
                                         </Dropdown>
                                     </div>
@@ -263,6 +270,14 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Ajustes: Nombres
                         </ResponsiveNavLink>
+                        {isAdmin && premiumFeatures?.identity && (
+                            <ResponsiveNavLink
+                                href={route('premium.configuration.edit')}
+                                active={route().current('premium.configuration.*')}
+                            >
+                                Ajustes: Identidad
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600">

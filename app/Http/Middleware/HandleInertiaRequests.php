@@ -52,6 +52,10 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn () => $request->session()->get('message')
             ],
             'municipal_config' => $municipalConfig,
+            'premiumFeatures' => [
+                'identity' => class_exists(\App\Http\Controllers\Tenant\MunicipalConfigurationController::class),
+                'importer' => class_exists(\App\Http\Controllers\Tenant\Premium\ImporterTXTController::class),
+            ],
         ];
     }
 }
