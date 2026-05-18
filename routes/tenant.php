@@ -62,6 +62,12 @@ Route::middleware([
             
             // Phase 14.2: Descarga RAMT (Departamental)
             Route::get('/departamento/ramt-acuse/{quarter}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'downloadRamt'])->name('activities.ramt.download');
+
+            // Phase 16: Admin Schedule Matrix Editor (Super-Admin & PMD only)
+            Route::middleware(['role:Super-Admin|PMD-Planeación'])->group(function () {
+                Route::get('/administrar', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'adminManage'])->name('activities.manage.index');
+                Route::put('/administrar-update/{schedule}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'adminUpdateSchedule'])->name('activities.manage.update');
+            });
         });
 
         // Ajustes Exclusivos (Role: Super-Admin)

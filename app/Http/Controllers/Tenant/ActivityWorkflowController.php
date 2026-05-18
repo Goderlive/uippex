@@ -320,4 +320,51 @@ class ActivityWorkflowController extends Controller
 
         return $pdf->download("RAMT_Acuse_Tri{$quarter}_".$department->name.".pdf");
     }
+    /**
+     * Phase 16: Admin Paginated Schedule Manager.
+     * Lists all activities with search + pagination for mass schedule editing.
+     */
+    public function adminManage(Request $request)
+    {
+        $search = $request->input('search');
+
+        $activities = SubstantiveActivity::with(['administrativeUnit.department', 'monthlySchedule'])
+            ->when($search, function ($query, string $search) {
+                $query->where('name', 'ILIKE', "%{$search}%");
+            })
+            ->orderBy('administrative_unit_id')
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return Inertia::render('Activities/AdminManage', [
+            'activities' => $activities,
+            'filters' => ['search' => $search],
+        ]);
+    }
+
+    /**
+     * Phase 16: Update a single ActivityMonthlySchedule (12-month matrix).
+     */
+    public function adminUpdateSchedule(Request $request, \App\Models\ActivityMonthlySchedule $schedule)
+    {
+        $validated = $request->validate([
+            'jan_programmed' => 'required|numeric|min:0',
+            'feb_programmed' => 'required|numeric|min:0',
+            'mar_programmed' => 'required|numeric|min:0',
+            'apr_programmed' => 'required|numeric|min:0',
+            'may_programmed' => 'required|numeric|min:0',
+            'jun_programmed' => 'required|numeric|min:0',
+            'jul_programmed' => 'required|numeric|min:0',
+            'aug_programmed' => 'required|numeric|min:0',
+            'sep_programmed' => 'required|numeric|min:0',
+            'oct_programmed' => 'required|numeric|min:0',
+            'nov_programmed' => 'required|numeric|min:0',
+            'dec_programmed' => 'required|numeric|min:0',
+        ]);
+
+        $schedule->update($validated);
+
+        return redirect()->back()->with('message', 'Programación actualizada correctamente.');
+    }
 }

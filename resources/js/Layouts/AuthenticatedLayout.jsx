@@ -68,6 +68,11 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 <Dropdown.Link href={route('reconductions.index')}>
                                                     Reconducciones
                                                 </Dropdown.Link>
+                                                {user.roles?.some(r => r.name === 'Super-Admin' || r.name === 'PMD-Planeación') && (
+                                                    <Dropdown.Link href={route('activities.manage.index')}>
+                                                        Administrar Programaciones
+                                                    </Dropdown.Link>
+                                                )}
                                             </Dropdown.Content>
                                         </Dropdown>
                                     </div>
@@ -247,6 +252,14 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Reconducciones
                         </ResponsiveNavLink>
+                        {user.roles?.some(r => r.name === 'Super-Admin' || r.name === 'PMD-Planeación') && (
+                            <ResponsiveNavLink
+                                href={route('activities.manage.index')}
+                                active={route().current('activities.manage.*')}
+                            >
+                                Administrar Programaciones
+                            </ResponsiveNavLink>
+                        )}
                         <div className="pt-2 pb-1 border-t border-gray-200 dark:border-gray-600 mt-2 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4">
                             Nuevas Secciones
                         </div>
