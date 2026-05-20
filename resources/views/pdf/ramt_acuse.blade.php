@@ -131,7 +131,7 @@
             <td width="60%" class="text-center">
                 <div class="title">{{ $config->official_name ?? 'H. Ayuntamiento' }}</div>
                 <div class="subtitle">Administración {{ $config->administration_period ?? 'Actual' }}</div>
-                <div class="subtitle">CONSTANCIA DE CUMPLIMIENTO TRIMESTRAL (RAMT)</div>
+                <div class="subtitle">Reporte de Avance de Metas Trimestral (RAMT)</div>
             </td>
             <td width="20%" class="text-right">
                 @if($logoBase64)
@@ -147,22 +147,11 @@
     </div>
 
     <div class="content">
-        Por medio del presente documento, se emite la certificación normativa denominada <strong>Constancia de
-            Cumplimiento Trimestral</strong>,
-        validando así el desempeño y cumplimiento íntegro del Presupuesto Basado en Resultados (PbR) correspondiente al
-        <strong>Trimestre {{ $quarter }}</strong>
-        para todas las variables y áreas asignadas a la Dependencia General:
-        <br><br>
-        <div class="text-center"
-            style="font-size: 14px; font-weight: bold; color: {{ $config->primary_color ?? '#333' }};">
-            {{ mb_strtoupper($department->name) }}
-        </div>
-        <br>
-        Se certifica que el <strong>{{ $department_global_percentage }}%</strong> de las actividades operativas
-        programadas en los meses que comprenden el trimestre señalado,
-        pertenecientes a todas sus Unidades Administrativas, han sido capturadas y se encuentran con estatus
-        <strong>"Validado y Homologado"</strong>
-        por Planeación Central (OSFEM), sin inconsistencias pendientes.
+        <strong>Reporte de Avance de Metas Trimestral "RAMT"</strong>, validando así el desempeñoy cumplimiento de las
+        metas de Presupuesto Basado en Resultados
+        Municipal (PbRM) correspondiente al <strong>Trimestre {{ $quarter }}</strong> para todas las variables y áreas
+        asignadas a la Dependencia General:
+        <strong>{{ mb_strtoupper($department->name) }} </strong>
     </div>
 
     @foreach($department->administrativeUnits as $area)
@@ -209,13 +198,6 @@
                         TITULAR DE LA DEPENDENCIA
                     </div>
                 @endif
-            </td>
-            <td style="width: 50%; vertical-align: top;">
-                <br><br><br>
-                <div class="footer-line" style="width: 80%;">
-                    <strong>{{ mb_strtoupper($user->name) }}</strong><br>
-                    ENLACE OPERATIVO RESPONSABLE
-                </div>
             </td>
         </tr>
     </table>
