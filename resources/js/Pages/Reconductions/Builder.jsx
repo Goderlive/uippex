@@ -59,13 +59,13 @@ export default function Builder({ reconduction, available_activities, can_edit, 
     const handleScheduleChange = (itemIndex, monthKey, value) => {
         const valStr = value === '' ? '0' : value;
         const numValue = parseFloat(valStr) || 0;
-        
+
         const newItems = [...draftItems];
         const item = newItems[itemIndex];
-        
+
         // Update specific month in new_schedule
         item.new_schedule[monthKey] = numValue;
-        
+
         // Auto-recalculate new_annual_goal dynamically
         item.new_annual_goal = Object.values(item.new_schedule).reduce((acc, curr) => acc + curr, 0);
 
@@ -86,20 +86,20 @@ export default function Builder({ reconduction, available_activities, can_edit, 
     };
 
     const submitReconduction = () => {
-        if(!confirm("¿Deseas enviar este dictamen a revisión? Ya no podrás editarlo.")) return;
+        if (!confirm("¿Deseas enviar este dictamen a revisión? Ya no podrás editarlo.")) return;
         router.post(route('reconductions.submit', reconduction.id));
     };
 
     const approveReconduction = () => {
-        if(!confirm("⚠️ APROBACIÓN OSFEM: Esto reescribirá instantáneamente las metas en el PBR oficial. ¿Estás seguro?")) return;
+        if (!confirm("⚠️ APROBACIÓN OSFEM: Esto reescribirá instantáneamente las metas en el PBR oficial. ¿Estás seguro?")) return;
         router.post(route('reconductions.approve', reconduction.id));
     };
 
     const monthNames = [
-        {k:'jan', n:'Ene'}, {k:'feb', n:'Feb'}, {k:'mar', n:'Mar'},
-        {k:'apr', n:'Abr'}, {k:'may', n:'May'}, {k:'jun', n:'Jun'},
-        {k:'jul', n:'Jul'}, {k:'aug', n:'Ago'}, {k:'sep', n:'Sep'},
-        {k:'oct', n:'Oct'}, {k:'nov', n:'Nov'}, {k:'dec', n:'Dic'},
+        { k: 'jan', n: 'Ene' }, { k: 'feb', n: 'Feb' }, { k: 'mar', n: 'Mar' },
+        { k: 'apr', n: 'Abr' }, { k: 'may', n: 'May' }, { k: 'jun', n: 'Jun' },
+        { k: 'jul', n: 'Jul' }, { k: 'aug', n: 'Ago' }, { k: 'sep', n: 'Sep' },
+        { k: 'oct', n: 'Oct' }, { k: 'nov', n: 'Nov' }, { k: 'dec', n: 'Dic' },
     ];
 
     return (
@@ -108,7 +108,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <span className="text-xs font-semibold uppercase tracking-wider text-rose-500 mb-1">
-                            {reconduction.document_number} · Trimestre {reconduction.quarter}
+                            {reconduction.document_number} · Trimestre {reconduction.quarter} {reconduction.administrative_unit && `· ${reconduction.administrative_unit.name}`}
                         </span>
                         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 uppercase">
                             Dictamen de Reconducción Programática
@@ -117,8 +117,8 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                     <div>
                         <span className={`px-3 py-1 text-sm rounded-full font-bold
                             ${reconduction.status === 0 ? 'bg-gray-100 text-gray-700' :
-                              reconduction.status === 1 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
-                              'bg-green-100 text-green-700'}`}>
+                                reconduction.status === 1 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                                    'bg-green-100 text-green-700'}`}>
                             ESTADO: {reconduction.status === 0 ? 'EN BORRADOR' : reconduction.status === 1 ? 'REVISIÓN PÚBLICA' : 'APLICADO EN SISTEMA'}
                         </span>
                     </div>
@@ -134,7 +134,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Añadir Actividad a Modificar</label>
                         <div className="flex space-x-4">
-                            <select 
+                            <select
                                 className="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 dark:bg-gray-900 dark:border-gray-700 text-sm"
                                 value={selectedActivityId}
                                 onChange={(e) => setSelectedActivityId(e.target.value)}
@@ -157,7 +157,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                 <div className="space-y-6">
                     {draftItems.map((item, index) => {
                         // Rescatar nombre de actividad si no fue recién añadida y viene de DB
-                        const displayActivityName = item.activity_name || available_activities.find(a=>a.id === item.substantive_activity_id)?.name || 'Actividad Desconocida';
+                        const displayActivityName = item.activity_name || item.activity?.name || available_activities.find(a => a.id === parseInt(item.substantive_activity_id))?.name || 'Actividad Desconocida';
 
                         return (
                             <div key={item.id || index} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -169,12 +169,12 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                                         </button>
                                     )}
                                 </div>
-                                
+
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                                         <div>
                                             <InputLabel value="Tipo de Movimiento OSFEM" />
-                                            <select 
+                                            <select
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 dark:bg-gray-900 dark:border-gray-700 text-sm"
                                                 value={item.modification_type}
                                                 onChange={(e) => handleItemChange(index, 'modification_type', e.target.value)}
@@ -225,8 +225,8 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                                                         <td className="text-[10px] font-bold text-rose-500 py-3">NUEVA</td>
                                                         {monthNames.map(m => (
                                                             <td key={m.k} className="px-1 border-x border-rose-100 dark:border-gray-800 align-middle">
-                                                                <input 
-                                                                    type="number" min="0" step="0.01" 
+                                                                <input
+                                                                    type="number" min="0" step="1"
                                                                     className="w-16 mx-auto text-xs p-1 text-center font-bold text-indigo-700 bg-white border border-rose-200 rounded focus:ring focus:ring-rose-200 dark:bg-gray-900 dark:text-indigo-300 dark:border-rose-900"
                                                                     value={item.new_schedule[m.k]}
                                                                     onChange={(e) => handleScheduleChange(index, m.k, e.target.value)}
@@ -268,14 +268,14 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                 {/* ACTION SUBMISSION HUB OVERVIEW DASHBOARD */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border-t-4 border-rose-500 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
                     <div className="text-sm text-gray-500">
-                      Total de Items Modificados: <span className="font-bold text-gray-800 dark:text-gray-200">{draftItems.length}</span>
+                        Total de Items Modificados: <span className="font-bold text-gray-800 dark:text-gray-200">{draftItems.length}</span>
                     </div>
 
                     <div className="flex space-x-4">
                         <Link href={route('reconductions.index')} className="px-4 py-2 text-gray-600 font-bold hover:underline">
                             ← Volver
                         </Link>
-                        
+
                         {can_edit && (
                             <>
                                 <SecondaryButton onClick={saveDraftDetails} className="border-gray-300 border-2">
@@ -289,8 +289,8 @@ export default function Builder({ reconduction, available_activities, can_edit, 
 
                         {can_validate && (
                             <PrimaryButton onClick={approveReconduction} className="bg-green-600 hover:bg-green-700 py-3 shadow-lg hover:scale-105 transition-all">
-                                ✅ APROBAR DICTAMEN 
-                                <br/><span className="text-[10px] font-normal uppercase opacity-75 inline-block w-full text-center">(RIESGO LEGAL: ESTO REESCRIBIRÁ EL PBR)</span>
+                                ✅ APROBAR DICTAMEN
+                                <br /><span className="text-[10px] font-normal uppercase opacity-75 inline-block w-full text-center">(RIESGO LEGAL: ESTO REESCRIBIRÁ EL PBR)</span>
                             </PrimaryButton>
                         )}
                     </div>

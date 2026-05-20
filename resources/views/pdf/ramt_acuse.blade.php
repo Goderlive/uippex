@@ -122,10 +122,10 @@
     <table class="header-table">
         <tr>
             <td width="20%">
-                @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
+                @if($shieldBase64)
+                    <img src="{{ $shieldBase64 }}" class="logo-img" alt="Escudo">
                 @else
-                    <span style="color: #999;">SIN LOGO</span>
+                    <span style="color: #999;">LOGO NO DISPONIBLE</span>
                 @endif
             </td>
             <td width="60%" class="text-center">
@@ -134,8 +134,8 @@
                 <div class="subtitle">CONSTANCIA DE CUMPLIMIENTO TRIMESTRAL (RAMT)</div>
             </td>
             <td width="20%" class="text-right">
-                @if($shieldBase64)
-                    <img src="{{ $shieldBase64 }}" class="logo-img" alt="Escudo">
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
                 @endif
             </td>
         </tr>
@@ -197,7 +197,9 @@
                 @if($department->holder)
                     <br><br><br>
                     <div class="footer-line" style="width: 80%;">
-                        <strong>{{ mb_strtoupper($department->holder->academic_degree ?? '') }} {{ mb_strtoupper($department->holder->first_name) }} {{ mb_strtoupper($department->holder->last_name) }}</strong><br>
+                        <strong>{{ mb_strtoupper($department->holder->academic_degree ?? '') }}
+                            {{ mb_strtoupper($department->holder->first_name) }}
+                            {{ mb_strtoupper($department->holder->last_name) }}</strong><br>
                         {{ mb_strtoupper($department->holder->position_title) }}
                     </div>
                 @else
@@ -217,6 +219,31 @@
             </td>
         </tr>
     </table>
+
+    <!-- SELLO DE TRAZABILIDAD - ÓRGANO AUDITOR -->
+    <div
+        style="margin-top: 50px; border-top: 1px dashed {{ $config->primary_color ?? '#333' }}; padding-top: 20px; page-break-inside: avoid;">
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 75%; vertical-align: top; line-height: 1.4;">
+                    <h4
+                        style="margin: 0 0 8px 0; color: {{ $config->primary_color ?? '#333' }}; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+                        TRAZABILIDAD
+                    </h4>
+                    <div style="font-family: monospace; font-size: 9px; color: #555;">
+                        <strong>FOLIO DE CERTIFICACIÓN (UUID):</strong> {{ $certificate_folio }}<br>
+                        <strong>FECHA DE REGISTRO / EMISIÓN:</strong> {{ date('Y-m-d H:i:s') }}<br>
+                        <strong>URL AUDITORÍA PBR:</strong> <span
+                            style="color: {{ $config->primary_color ?? '#6366f1' }};">{{ $link_auditoria }}</span>
+                    </div>
+                </td>
+                <td style="width: 25%; text-align: right; vertical-align: middle;">
+                    <img src="data:image/svg+xml;base64,{{ $qr_code_base64 }}" style="width: 100px; height: 100px;"
+                        alt="QR Verification" />
+                </td>
+            </tr>
+        </table>
+    </div>
 
 </body>
 

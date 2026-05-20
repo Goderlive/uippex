@@ -169,13 +169,12 @@ export default function AdminManage({ auth, activities, filters, flash }) {
                                             key={i}
                                             disabled={!link.url}
                                             onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                                            className={`px-3 py-1 text-sm rounded border transition-colors ${
-                                                link.active
+                                            className={`px-3 py-1 text-sm rounded border transition-colors ${link.active
                                                     ? 'bg-indigo-600 text-white border-indigo-600'
                                                     : link.url
                                                         ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                                                         : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                            }`}
+                                                }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
                                     ))}
@@ -204,7 +203,7 @@ export default function AdminManage({ auth, activities, filters, flash }) {
                                     <TextInput
                                         id={key}
                                         type="number"
-                                        step="0.01"
+                                        step="1"
                                         min="0"
                                         className="mt-1 block w-full text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
                                         value={data[key]}

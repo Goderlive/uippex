@@ -1,11 +1,39 @@
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import Modal from '@/Components/Modal';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 
-export default function Index({ reconductions, isAdmin }) {
-    const { post } = useForm();
+export default function Index({ reconductions, isAdmin, administrative_units = [], errors }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    const { data, setData, post, processing } = useForm({
+        administrative_unit_id: ''
+    });
 
     const createDraft = () => {
-        post(route('reconductions.store'));
+        if (!isAdmin && administrative_units.length > 1) {
+            // Set the first one as default selected
+            setData('administrative_unit_id', administrative_units[0].id.toString());
+            setIsModalOpen(true);
+        } else if (!isAdmin && administrative_units.length === 1) {
+            // Only 1 unit exists, post directly with it
+            post(route('reconductions.store'), {
+                data: { administrative_unit_id: administrative_units[0].id }
+            });
+        } else {
+            // Fallback for backend checks (e.g. 0 units)
+            post(route('reconductions.store'));
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(route('reconductions.store'), {
+            onSuccess: () => setIsModalOpen(false)
+        });
     };
 
     return (
@@ -20,7 +48,7 @@ export default function Index({ reconductions, isAdmin }) {
                             onClick={createDraft}
                             className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150"
                         >
-                            + Nuevo Oficio (Draft)
+                            + Nueva Reconducción (Borrador)
                         </button>
                     )}
                 </div>
@@ -30,9 +58,16 @@ export default function Index({ reconductions, isAdmin }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    {/* Error message display if any */}
+                    {errors && errors.error && (
+                        <div className="mb-6 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg shadow-sm">
+                            {errors.error}
+                        </div>
+                    )}
+
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div className="p-6 text-gray-900 dark:text-gray-100">
-                            
+
                             {reconductions.length === 0 ? (
                                 <p className="text-gray-500 text-center py-8">No hay documentos generados.</p>
                             ) : (
@@ -54,7 +89,7 @@ export default function Index({ reconductions, isAdmin }) {
                                                         {rec.document_number}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                        {rec.requested_date} <br/> 
+                                                        {rec.requested_date} <br />
                                                         <span className="text-xs text-gray-500 dark:text-gray-400">Trimestre {rec.quarter}</span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -62,25 +97,25 @@ export default function Index({ reconductions, isAdmin }) {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                            ${rec.status === 0 ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' : 
-                                                              rec.status === 1 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
-                                                              rec.status === 2 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                                                              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'}`}
+                                                            ${rec.status === 0 ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
+                                                                rec.status === 1 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+                                                                    rec.status === 2 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                                                                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'}`}
                                                         >
                                                             {rec.status === 0 ? 'Borrador' : rec.status === 1 ? 'En Revisión (PMD)' : rec.status === 2 ? 'Aprobado PBR' : 'Rechazado'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-4">
-                                                        <Link 
+                                                        <Link
                                                             href={route('reconductions.edit', rec.id)}
                                                             className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                                                         >
                                                             {isAdmin ? 'Revisar Detalle' : 'Editar / Ver Detalle'}
                                                         </Link>
-                                                        {rec.status > 0 && (
-                                                            <a 
-                                                                href={route('reconductions.pdf', rec.id)} 
-                                                                target="_blank" 
+                                                        {rec.status === 2 && (
+                                                            <a
+                                                                href={route('reconductions.pdf', rec.id)}
+                                                                target="_blank"
                                                                 rel="noreferrer"
                                                                 className="text-rose-600 hover:text-rose-900 dark:text-rose-400 dark:hover:text-rose-300 font-bold"
                                                             >
@@ -99,6 +134,45 @@ export default function Index({ reconductions, isAdmin }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de selección de Unidad Administrativa para Nueva Reconducción */}
+            <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="md">
+                <form onSubmit={handleSubmit} className="p-6 bg-white dark:bg-gray-800 rounded-lg">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        Nueva Reconducción Programática
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                        Tu dependencia cuenta con múltiples áreas administrativas. Selecciona el área para la cual generarás el dictamen de reconducción:
+                    </p>
+
+                    <div className="mt-4">
+                        <InputLabel htmlFor="administrative_unit_id" value="Área Administrativa" />
+                        <select
+                            id="administrative_unit_id"
+                            name="administrative_unit_id"
+                            value={data.administrative_unit_id}
+                            onChange={(e) => setData('administrative_unit_id', e.target.value)}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 text-sm dark:text-gray-300"
+                            required
+                        >
+                            {administrative_units.map((unit) => (
+                                <option key={unit.id} value={unit.id}>
+                                    {unit.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="mt-8 flex justify-end space-x-3">
+                        <SecondaryButton onClick={() => setIsModalOpen(false)}>
+                            Cancelar
+                        </SecondaryButton>
+                        <PrimaryButton disabled={processing} className="bg-indigo-600 hover:bg-indigo-700">
+                            Crear Borrador
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

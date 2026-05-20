@@ -38,9 +38,15 @@ class ReconductionController extends Controller
 
         $reconductions = $query->orderBy('created_at', 'desc')->get();
 
+        $administrativeUnits = [];
+        if (!$isAdmin && $user->department_id) {
+            $administrativeUnits = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)->get();
+        }
+
         return Inertia::render('Reconductions/Index', [
             'reconductions' => $reconductions,
-            'isAdmin' => $isAdmin
+            'isAdmin' => $isAdmin,
+            'administrative_units' => $administrativeUnits
         ]);
     }
 
@@ -50,14 +56,24 @@ class ReconductionController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        
-        // Obtener el AdministrativeUnit asociado al Enlace. (En Fase 6 se amarraba Department, asumo la relacion 1ra Unit de su Dept)
-        // Para simplificar, buscamos la Unit en la que le toca operar, si no tiene mandamos 403.
-        // Simularemos encontrar su Unit principal.
-        $areaId = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)->value('id');
-        
+
+        $areaId = $request->input('administrative_unit_id');
+
+        if ($areaId) {
+            // Validar que el área seleccionada pertenezca a la misma dependencia (department) del usuario enlace
+            $exists = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)
+                ->where('id', $areaId)
+                ->exists();
+            if (!$exists) {
+                return redirect()->back()->withErrors(['error' => 'El área seleccionada no pertenece a tu dependencia.']);
+            }
+        } else {
+            // Si no se envía id (por ejemplo si solo hay 1), tomamos la primera
+            $areaId = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)->value('id');
+        }
+
         if (!$areaId) {
-            return redirect()->back()->withErrors('Tu usuario no tiene un Área (AdministrativeUnit) válida asociada para solicitar reconducciones.');
+            return redirect()->back()->withErrors(['error' => 'Tu usuario no tiene un Área (AdministrativeUnit) válida asociada para solicitar reconducciones.']);
         }
 
         // Calculation of current Quarter (1-4)
@@ -91,15 +107,18 @@ class ReconductionController extends Controller
             abort(403, 'Aceso denegado al dictamen.');
         }
 
-        $reconduction->load(['items', 'administrativeUnit']);
+        $reconduction->load(['items.activity', 'administrativeUnit']);
 
         // Actividades disponibles con su Programación y acumulado logrado (achieved_so_far)
         $activities = SubstantiveActivity::where('administrative_unit_id', $reconduction->administrative_unit_id)
-            ->with(['monthlySchedule', 'progressReports' => function($q){
-                $q->where('status', 1); // Solo reportes validados
-            }])
+            ->with([
+                'monthlySchedule',
+                'progressReports' => function ($q) {
+                    $q->where('status', 1); // Solo reportes validados
+                }
+            ])
             ->get()
-            ->map(function($act) {
+            ->map(function ($act) {
                 // Sumar avance validado acumulado real
                 $achieved_so_far = $act->progressReports->sum('reported_value');
                 $act->achieved_so_far = $achieved_so_far;
@@ -108,10 +127,18 @@ class ReconductionController extends Controller
                 if ($act->monthlySchedule) {
                     $sch = $act->monthlySchedule;
                     $act->schedule_matrix = [
-                        'jan' => (float)$sch->jan_programmed, 'feb' => (float)$sch->feb_programmed, 'mar' => (float)$sch->mar_programmed,
-                        'apr' => (float)$sch->apr_programmed, 'may' => (float)$sch->may_programmed, 'jun' => (float)$sch->jun_programmed,
-                        'jul' => (float)$sch->jul_programmed, 'aug' => (float)$sch->aug_programmed, 'sep' => (float)$sch->sep_programmed,
-                        'oct' => (float)$sch->oct_programmed, 'nov' => (float)$sch->nov_programmed, 'dec' => (float)$sch->dec_programmed,
+                        'jan' => (float) $sch->jan_programmed,
+                        'feb' => (float) $sch->feb_programmed,
+                        'mar' => (float) $sch->mar_programmed,
+                        'apr' => (float) $sch->apr_programmed,
+                        'may' => (float) $sch->may_programmed,
+                        'jun' => (float) $sch->jun_programmed,
+                        'jul' => (float) $sch->jul_programmed,
+                        'aug' => (float) $sch->aug_programmed,
+                        'sep' => (float) $sch->sep_programmed,
+                        'oct' => (float) $sch->oct_programmed,
+                        'nov' => (float) $sch->nov_programmed,
+                        'dec' => (float) $sch->dec_programmed,
                     ];
                 } else {
                     $act->schedule_matrix = null;
@@ -156,7 +183,7 @@ class ReconductionController extends Controller
                     'previous_annual_goal' => $item['previous_annual_goal'],
                     'new_annual_goal' => $item['new_annual_goal'],
                     'achieved_so_far' => $item['achieved_so_far'],
-                    'previous_schedule' => $item['previous_schedule'], 
+                    'previous_schedule' => $item['previous_schedule'],
                     'new_schedule' => $item['new_schedule'],
                     'justification' => $item['justification'] ?? 'Sin justificación.',
                 ]);
@@ -171,8 +198,9 @@ class ReconductionController extends Controller
      */
     public function sendToValidation(ProgrammaticReconduction $reconduction)
     {
-        if ($reconduction->status !== 0) abort(403);
-        
+        if ($reconduction->status !== 0)
+            abort(403);
+
         $reconduction->update(['status' => 1]); // Enviado
         return redirect()->route('reconductions.index')->with('message', 'Oficio de reconducción remitido para validación central.');
     }
@@ -197,7 +225,7 @@ class ReconductionController extends Controller
             foreach ($reconduction->items as $item) {
                 $activityId = $item->substantive_activity_id;
                 $newSch = $item->new_schedule; // This is loaded as AsArrayObject!
-                
+
                 // Actualizar Matriz Real PBR (La lógica principal!)
                 ActivityMonthlySchedule::where('substantive_activity_id', $activityId)
                     ->update([
@@ -230,6 +258,10 @@ class ReconductionController extends Controller
      */
     public function generatePdf(ProgrammaticReconduction $reconduction)
     {
+        if ($reconduction->status !== 2) {
+            abort(403, 'El PDF oficial firmado únicamente puede generarse cuando el dictamen de reconducción ha sido completamente validado y aprobado por el administrador.');
+        }
+
         $reconduction->load([
             'requestedBy',
             'validatedBy',
@@ -241,6 +273,6 @@ class ReconductionController extends Controller
             'reconduction' => $reconduction,
         ])->setPaper('letter', 'landscape');
 
-        return $pdf->stream('Dictamen_'.$reconduction->document_number.'.pdf');
+        return $pdf->stream('Dictamen_' . $reconduction->document_number . '.pdf');
     }
 }

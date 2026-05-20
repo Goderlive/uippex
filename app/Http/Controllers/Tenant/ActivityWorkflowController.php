@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
+use App\Models\RamtCertificate;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ActivityWorkflowController extends Controller
 {
@@ -268,6 +269,37 @@ class ActivityWorkflowController extends Controller
             abort(403, 'No hay metas programadas para generar el RAMT departamental.');
         }
 
+        // Strict Math Check: 100% of reports for this quarter must be validated
+        $expectedQuarterTotal = $totalActivities * 3;
+        $validatedCount = \App\Models\MonthlyProgressReport::whereHas('substantiveActivity', function($qBase) use ($areasIdArray) {
+            $qBase->whereIn('administrative_unit_id', $areasIdArray);
+        })
+        ->whereIn('month', $monthsArr)
+        ->where('status', 1)
+        ->count();
+
+        if ($validatedCount !== $expectedQuarterTotal) {
+            abort(403, 'Aún no se ha completado y validado el 100% de los reportes correspondientes a este trimestre para toda la dependencia.');
+        }
+
+        // Generate or recycle the tracking certificate log
+        $certificate = RamtCertificate::updateOrCreate(
+            [
+                'department_id' => $department->id,
+                'quarter' => $quarter,
+            ],
+            [
+                'issued_at' => now(),
+            ]
+        );
+
+        $folio = $certificate->certificate_folio;
+        $link_auditoria = url("/auditar/ramt/{$folio}");
+
+        // Generate QR code base64 SVG string
+        $qrCodeSvg = QrCode::size(120)->generate($link_auditoria);
+        $qrCodeBase64 = base64_encode($qrCodeSvg);
+
         // Global accumulators
         $globalProg = 0;
         $globalRep = 0;
@@ -315,7 +347,10 @@ class ActivityWorkflowController extends Controller
             'user' => $user,
             'quarter' => $quarter,
             'config' => $config,
-            'department_global_percentage' => $departmentGlobalPercentage
+            'department_global_percentage' => $departmentGlobalPercentage,
+            'certificate_folio' => $folio,
+            'link_auditoria' => $link_auditoria,
+            'qr_code_base64' => $qrCodeBase64,
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download("RAMT_Acuse_Tri{$quarter}_".$department->name.".pdf");
