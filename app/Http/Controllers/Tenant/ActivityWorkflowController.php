@@ -355,6 +355,26 @@ class ActivityWorkflowController extends Controller
 
         return $pdf->download("RAMT_Acuse_Tri{$quarter}_".$department->name.".pdf");
     }
+
+    /**
+     * Phase 17-A: Public Validation page for RAMT Certificate.
+     */
+    public function verifyRamt(string $folio)
+    {
+        $certificate = RamtCertificate::with(['department.administrativeUnits'])->where('certificate_folio', $folio)->first();
+
+        if (!$certificate) {
+            abort(404, 'El folio de constancia RAMT especificado no existe o es inválido.');
+        }
+
+        $config = \App\Models\MunicipalConfiguration::getSettings();
+
+        return view('activities.verify_ramt', [
+            'certificate' => $certificate,
+            'config' => $config,
+        ]);
+    }
+
     /**
      * Phase 16: Admin Paginated Schedule Manager.
      * Lists all activities with search + pagination for mass schedule editing.

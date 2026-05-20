@@ -39,6 +39,9 @@ Route::middleware([
         ]);
     })->middleware(['auth', 'verified'])->name('dashboard');
 
+    // Public Auditor Verification Route (Phase 17-A)
+    Route::get('/auditar/ramt/{folio}', [App\Http\Controllers\Tenant\ActivityWorkflowController::class, 'verifyRamt'])->name('activities.ramt.verify');
+
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
