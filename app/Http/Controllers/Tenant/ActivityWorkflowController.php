@@ -361,17 +361,74 @@ class ActivityWorkflowController extends Controller
      */
     public function verifyRamt(string $folio)
     {
-        $certificate = RamtCertificate::with(['department.administrativeUnits'])->where('certificate_folio', $folio)->first();
+        $certificate = RamtCertificate::where('certificate_folio', $folio)->first();
 
         if (!$certificate) {
             abort(404, 'El folio de constancia RAMT especificado no existe o es inválido.');
         }
 
+        $quarter = $certificate->quarter;
+        $quartersMap = [1 => [1, 2, 3], 2 => [4, 5, 6], 3 => [7, 8, 9], 4 => [10, 11, 12]];
+        $monthPrefixes = [
+            1 => 'jan', 2 => 'feb', 3 => 'mar', 4 => 'apr', 5 => 'may', 6 => 'jun',
+            7 => 'jul', 8 => 'aug', 9 => 'sep', 10 => 'oct', 11 => 'nov', 12 => 'dec'
+        ];
+        $monthsArr = $quartersMap[$quarter];
+
+        $department = Department::with([
+            'holder',
+            'administrativeUnits.substantiveActivities.monthlySchedule',
+            'administrativeUnits.substantiveActivities.progressReports' => function($query) use ($monthsArr) {
+                $query->whereIn('month', $monthsArr)->where('status', 1);
+            }
+        ])->find($certificate->department_id);
+
+        if (!$department) {
+            abort(404, 'La dependencia asociada a este certificado no existe.');
+        }
+
+        // Calculate progress percentages and attach public evidence URLs
+        foreach ($department->administrativeUnits as $area) {
+            foreach ($area->substantiveActivities as $activity) {
+                $actProg = 0;
+                $actRep = 0;
+
+                if ($activity->monthlySchedule) {
+                    foreach ($monthsArr as $m) {
+                        $col = $monthPrefixes[$m] . '_programmed';
+                        $actProg += (float) $activity->monthlySchedule->$col;
+                    }
+                }
+
+                foreach ($activity->progressReports as $report) {
+                    $actRep += (float) $report->reported_value;
+                    if ($report->evidence_path) {
+                        $report->evidence_url = tenant_asset($report->evidence_path);
+                    }
+                }
+
+                if ($actProg == 0) {
+                    $actPercent = 100.00;
+                } else {
+                    $actPercent = ($actRep / $actProg) * 100;
+                }
+
+                $activity->setAttribute('trimestral_compliance_percent', number_format(min($actPercent, 100), 2));
+            }
+        }
+
         $config = \App\Models\MunicipalConfiguration::getSettings();
+        $monthNames = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
+            7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
 
         return view('activities.verify_ramt', [
             'certificate' => $certificate,
+            'department' => $department,
             'config' => $config,
+            'monthsArr' => $monthsArr,
+            'monthNames' => $monthNames,
         ]);
     }
 
