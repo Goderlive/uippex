@@ -8,12 +8,12 @@ import InputLabel from '@/Components/InputLabel';
 
 export default function Builder({ reconduction, available_activities, can_edit, can_validate }) {
     // Array Draft of modifications (The Matrix Builder)
-    const [draftItems, setDraftItems] = useState([]);
+    const [draftItems, setDraftItems] = useState(reconduction.items || []);
     const [selectedActivityId, setSelectedActivityId] = useState('');
 
     useEffect(() => {
         // Hydrate draft items from server if they exist in the Reconduction eager load
-        if (reconduction.items && reconduction.items.length > 0) {
+        if (reconduction.items) {
             setDraftItems(reconduction.items);
         }
     }, [reconduction]);
@@ -87,12 +87,17 @@ export default function Builder({ reconduction, available_activities, can_edit, 
 
     const submitReconduction = () => {
         if (!confirm("¿Deseas enviar este dictamen a revisión? Ya no podrás editarlo.")) return;
-        router.post(route('reconductions.submit', reconduction.id));
+        router.post(route('reconductions.submit', reconduction.id), { items: draftItems });
     };
 
     const approveReconduction = () => {
         if (!confirm("⚠️ APROBACIÓN OSFEM: Esto reescribirá instantáneamente las metas en el PBR oficial. ¿Estás seguro?")) return;
         router.post(route('reconductions.approve', reconduction.id));
+    };
+
+    const deleteReconduction = () => {
+        if (!confirm("¿Deseas ELIMINAR definitivamente este dictamen? Esta acción no se puede deshacer.")) return;
+        router.delete(route('reconductions.destroy', reconduction.id));
     };
 
     const monthNames = [
@@ -217,7 +222,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                                                         <td className="text-[10px] font-bold text-gray-400 py-2">ORIG.</td>
                                                         {monthNames.map(m => (
                                                             <td key={m.k} className="text-xs text-gray-500 p-1 border-x border-gray-100 dark:border-gray-800">
-                                                                {item.previous_schedule[m.k]}
+                                                                {item.previous_schedule?.[m.k] ?? 0}
                                                             </td>
                                                         ))}
                                                     </tr>
@@ -228,7 +233,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                                                                 <input
                                                                     type="number" min="0" step="1"
                                                                     className="w-16 mx-auto text-xs p-1 text-center font-bold text-indigo-700 bg-white border border-rose-200 rounded focus:ring focus:ring-rose-200 dark:bg-gray-900 dark:text-indigo-300 dark:border-rose-900"
-                                                                    value={item.new_schedule[m.k]}
+                                                                    value={item.new_schedule?.[m.k] ?? ''}
                                                                     onChange={(e) => handleScheduleChange(index, m.k, e.target.value)}
                                                                     disabled={!can_edit}
                                                                 />
@@ -288,10 +293,15 @@ export default function Builder({ reconduction, available_activities, can_edit, 
                         )}
 
                         {can_validate && (
-                            <PrimaryButton onClick={approveReconduction} className="bg-green-600 hover:bg-green-700 py-3 shadow-lg hover:scale-105 transition-all">
-                                ✅ APROBAR DICTAMEN
-                                <br /><span className="text-[10px] font-normal uppercase opacity-75 inline-block w-full text-center">(RIESGO LEGAL: ESTO REESCRIBIRÁ EL PBR)</span>
-                            </PrimaryButton>
+                            <>
+                                <SecondaryButton onClick={deleteReconduction} className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+                                    🗑 ELIMINAR DICTAMEN
+                                </SecondaryButton>
+                                <PrimaryButton onClick={approveReconduction} className="bg-green-600 hover:bg-green-700 py-3 shadow-lg hover:scale-105 transition-all">
+                                    ✅ APROBAR DICTAMEN
+                                    <br /><span className="text-[10px] font-normal uppercase opacity-75 inline-block w-full text-center">(RIESGO LEGAL: ESTO REESCRIBIRÁ EL PBR)</span>
+                                </PrimaryButton>
+                            </>
                         )}
                     </div>
                 </div>

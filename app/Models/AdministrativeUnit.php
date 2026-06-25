@@ -15,6 +15,7 @@ class AdministrativeUnit extends Model
     protected $fillable = [
         'fiscal_year_id',
         'department_id',
+        'master_administrative_unit_id',
         'general_sector_code',
         'auxiliary_sector_code',
         'budget_project_code',
@@ -24,6 +25,11 @@ class AdministrativeUnit extends Model
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);
+    }
+
+    public function masterAdministrativeUnit(): BelongsTo
+    {
+        return $this->belongsTo(MasterAdministrativeUnit::class);
     }
 
     public function department(): BelongsTo

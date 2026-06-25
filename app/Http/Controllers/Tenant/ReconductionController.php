@@ -39,8 +39,10 @@ class ReconductionController extends Controller
         $reconductions = $query->orderBy('created_at', 'desc')->get();
 
         $administrativeUnits = [];
-        if (!$isAdmin && $user->department_id) {
-            $administrativeUnits = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)->get();
+        $userDeptId = $user->getCurrentDepartment()?->id;
+
+        if (!$isAdmin && $userDeptId) {
+            $administrativeUnits = \App\Models\AdministrativeUnit::where('department_id', $userDeptId)->get();
         }
 
         return Inertia::render('Reconductions/Index', [
@@ -61,7 +63,8 @@ class ReconductionController extends Controller
 
         if ($areaId) {
             // Validar que el área seleccionada pertenezca a la misma dependencia (department) del usuario enlace
-            $exists = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)
+            $userDeptId = clone $user->getCurrentDepartment()?->id;
+            $exists = \App\Models\AdministrativeUnit::where('department_id', $userDeptId)
                 ->where('id', $areaId)
                 ->exists();
             if (!$exists) {
@@ -69,7 +72,8 @@ class ReconductionController extends Controller
             }
         } else {
             // Si no se envía id (por ejemplo si solo hay 1), tomamos la primera
-            $areaId = \App\Models\AdministrativeUnit::where('department_id', $user->department_id)->value('id');
+            $userDeptId = clone $user->getCurrentDepartment()?->id;
+            $areaId = \App\Models\AdministrativeUnit::where('department_id', $userDeptId)->value('id');
         }
 
         if (!$areaId) {
@@ -153,7 +157,7 @@ class ReconductionController extends Controller
         return Inertia::render('Reconductions/Builder', [
             'reconduction' => $reconduction,
             'available_activities' => $activities,
-            'can_edit' => ($reconduction->status === 0 && !$isAdmin),
+            'can_edit' => ($reconduction->status === 0),
             'can_validate' => ($isAdmin && $reconduction->status === 1)
         ]);
     }
@@ -172,19 +176,23 @@ class ReconductionController extends Controller
             'items' => 'array',
         ]);
 
-        DB::transaction(function () use ($request, $reconduction) {
+        $items = $request->input('items', []);
+        \Illuminate\Support\Facades\Log::info('Reconduction Update Items Count:', ['count' => count($items)]);
+        \Illuminate\Support\Facades\Log::info('Reconduction Update Items Data:', $items);
+
+        DB::transaction(function () use ($items, $reconduction) {
             // Recrear items
             $reconduction->items()->delete();
 
-            foreach ($request->items as $item) {
+            foreach ($items as $item) {
                 $reconduction->items()->create([
                     'substantive_activity_id' => $item['substantive_activity_id'],
                     'modification_type' => $item['modification_type'] ?? 'increase',
-                    'previous_annual_goal' => $item['previous_annual_goal'],
-                    'new_annual_goal' => $item['new_annual_goal'],
-                    'achieved_so_far' => $item['achieved_so_far'],
-                    'previous_schedule' => $item['previous_schedule'],
-                    'new_schedule' => $item['new_schedule'],
+                    'previous_annual_goal' => $item['previous_annual_goal'] ?? 0,
+                    'new_annual_goal' => $item['new_annual_goal'] ?? 0,
+                    'achieved_so_far' => $item['achieved_so_far'] ?? 0,
+                    'previous_schedule' => $item['previous_schedule'] ?? [],
+                    'new_schedule' => $item['new_schedule'] ?? [],
                     'justification' => $item['justification'] ?? 'Sin justificación.',
                 ]);
             }
@@ -196,13 +204,49 @@ class ReconductionController extends Controller
     /**
      * Enviar a Validación (Pasa al PMD Admin)
      */
-    public function sendToValidation(ProgrammaticReconduction $reconduction)
+    public function sendToValidation(Request $request, ProgrammaticReconduction $reconduction)
     {
         if ($reconduction->status !== 0)
             abort(403);
 
+        // Guardar automáticamente los items antes de enviar
+        if ($request->has('items')) {
+            $items = $request->input('items', []);
+            DB::transaction(function () use ($items, $reconduction) {
+                $reconduction->items()->delete();
+
+                foreach ($items as $item) {
+                    $reconduction->items()->create([
+                        'substantive_activity_id' => $item['substantive_activity_id'],
+                        'modification_type' => $item['modification_type'] ?? 'increase',
+                        'previous_annual_goal' => $item['previous_annual_goal'] ?? 0,
+                        'new_annual_goal' => $item['new_annual_goal'] ?? 0,
+                        'achieved_so_far' => $item['achieved_so_far'] ?? 0,
+                        'previous_schedule' => $item['previous_schedule'] ?? [],
+                        'new_schedule' => $item['new_schedule'] ?? [],
+                        'justification' => $item['justification'] ?? 'Sin justificación.',
+                    ]);
+                }
+            });
+        }
+
         $reconduction->update(['status' => 1]); // Enviado
-        return redirect()->route('reconductions.index')->with('message', 'Oficio de reconducción remitido para validación central.');
+        return redirect()->route('reconductions.index')->with('message', 'Oficio de reconducción guardado y remitido para validación central.');
+    }
+
+    /**
+     * Eliminar la Reconducción (Soft Delete)
+     */
+    public function destroy(ProgrammaticReconduction $reconduction)
+    {
+        $user = Auth::user();
+        if (!$user->hasAnyRole(['Super-Admin', 'PMD-Planeación'])) {
+            abort(403);
+        }
+
+        $reconduction->delete();
+
+        return redirect()->route('reconductions.index')->with('message', 'Dictamen eliminado correctamente.');
     }
 
     /**
@@ -269,8 +313,11 @@ class ReconductionController extends Controller
             'items.activity',
         ]);
 
+        $config = \App\Models\MunicipalConfiguration::first();
+
         $pdf = Pdf::loadView('pdf.reconduction_dictamen', [
             'reconduction' => $reconduction,
+            'config' => $config,
         ])->setPaper('letter', 'landscape');
 
         return $pdf->stream('Dictamen_' . $reconduction->document_number . '.pdf');

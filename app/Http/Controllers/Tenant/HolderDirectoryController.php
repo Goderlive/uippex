@@ -18,8 +18,11 @@ class HolderDirectoryController extends Controller
 
         // Filter by user's department unless they are Super-Admin or PMD-Planeación
         if (!$user->hasRole(['Super-Admin', 'PMD-Planeación'])) {
-            if ($user->department_id) {
-                $query->where('id', $user->department_id);
+            if ($user->master_department_id) {
+                $userDept = clone $user->getCurrentDepartment();
+                if ($userDept) {
+                    $query->where('id', $userDept->id);
+                }
             }
         }
 

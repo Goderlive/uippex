@@ -31,9 +31,11 @@ class ActivityWorkflowController extends Controller
         }
 
         // Enlace-Dependencia Role: See only their areas
-        if ($user->department_id) {
-            $areas = AdministrativeUnit::where('department_id', $user->department_id)->get();
-            $dept = Department::find($user->department_id);
+        if ($user->master_department_id) {
+            $dept = clone $user->getCurrentDepartment();
+            if (!$dept) return redirect()->route('dashboard')->with('error', 'Tu usuario no tiene una dependencia operativa para este año fiscal.');
+
+            $areas = AdministrativeUnit::where('department_id', $dept->id)->get();
             
             // Phase 14.2: RAMT Multi-Área Departamental Math
             $ramtCompliance = [1 => false, 2 => false, 3 => false, 4 => false];
@@ -75,7 +77,8 @@ class ActivityWorkflowController extends Controller
 
         // Security: Prevent Enlaces from seeing other departments via URL tampering
         if (!$user->hasAnyRole(['Super-Admin', 'PMD-Planeación'])) {
-            if ((int)$user->department_id !== (int)$department->id) {
+            $userDept = $user->getCurrentDepartment();
+            if (!$userDept || (int)$userDept->id !== (int)$department->id) {
                 abort(403, 'Acceso denegado: No puedes consultar dependencias ajenas.');
             }
         }
@@ -97,7 +100,8 @@ class ActivityWorkflowController extends Controller
 
         // Security Check
         if (!$user->hasAnyRole(['Super-Admin', 'PMD-Planeación'])) {
-            if ((int)$user->department_id !== (int)$administrativeUnit->department_id) {
+            $userDept = $user->getCurrentDepartment();
+            if (!$userDept || (int)$userDept->id !== (int)$administrativeUnit->department_id) {
                 abort(403, 'Acceso denegado: Esta unidad no pertenece a tu dependencia.');
             }
         }
@@ -148,7 +152,8 @@ class ActivityWorkflowController extends Controller
 
         // Security
         if (!$user->hasAnyRole(['Super-Admin', 'PMD-Planeación'])) {
-            if ((int)$user->department_id !== (int)$activity->administrativeUnit->department_id) {
+            $userDept = $user->getCurrentDepartment();
+            if (!$userDept || (int)$userDept->id !== (int)$activity->administrativeUnit->department_id) {
                 abort(403, 'No tienes permiso para reportar el avance de esta actividad.');
             }
         }
@@ -250,13 +255,18 @@ class ActivityWorkflowController extends Controller
         ];
         $monthsArr = $quartersMap[$quarter];
 
+        $userDept = clone $user->getCurrentDepartment();
+        if (!$userDept) {
+            abort(403, 'Usuario sin departamento activo asignado en este año fiscal.');
+        }
+
         $department = Department::with([
             'holder',
             'administrativeUnits.substantiveActivities.monthlySchedule',
             'administrativeUnits.substantiveActivities.progressReports' => function($query) use ($monthsArr) {
                 $query->whereIn('month', $monthsArr)->where('status', 1);
             }
-        ])->find($user->department_id);
+        ])->find($userDept->id);
         
         if (!$department) {
             abort(403, 'Usuario sin departamento asignado.');

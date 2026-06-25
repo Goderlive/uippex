@@ -102,6 +102,7 @@ Route::middleware([
             Route::put('/{reconduction}', [App\Http\Controllers\Tenant\ReconductionController::class, 'update'])->name('update');
             Route::post('/{reconduction}/submit', [App\Http\Controllers\Tenant\ReconductionController::class, 'sendToValidation'])->name('submit');
             Route::post('/{reconduction}/approve', [App\Http\Controllers\Tenant\ReconductionController::class, 'approveReconduction'])->name('approve');
+            Route::delete('/{reconduction}', [App\Http\Controllers\Tenant\ReconductionController::class, 'destroy'])->name('destroy');
             
             // OSFEM PDF Download Route
             Route::get('/{reconduction}/dictamen-pdf', [App\Http\Controllers\Tenant\ReconductionController::class, 'generatePdf'])->name('pdf');

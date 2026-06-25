@@ -25,24 +25,60 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'administrative_unit_id',
-        'department_id',
+        'master_administrative_unit_id',
+        'master_department_id',
     ];
 
     /**
-     * Get the department.
+     * Get the master department.
      */
-    public function department(): BelongsTo
+    public function masterDepartment(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(MasterDepartment::class);
     }
 
     /**
-     * Get the unit.
+     * Get the master administrative unit.
+     */
+    public function masterAdministrativeUnit(): BelongsTo
+    {
+        return $this->belongsTo(MasterAdministrativeUnit::class);
+    }
+
+    /**
+     * Alias for frontend compatibility
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(MasterDepartment::class, 'master_department_id');
+    }
+
+    /**
+     * Alias for frontend compatibility
      */
     public function administrativeUnit(): BelongsTo
     {
-        return $this->belongsTo(AdministrativeUnit::class);
+        return $this->belongsTo(MasterAdministrativeUnit::class, 'master_administrative_unit_id');
+    }
+
+    /**
+     * Helper to get the transactional department for the current active context (latest).
+     */
+    public function getCurrentDepartment()
+    {
+        return $this->master_department_id 
+            ? \App\Models\Department::where('master_department_id', $this->master_department_id)->latest('id')->first() 
+            : null;
+    }
+
+    /**
+     * Helper to get the transactional administrative unit for the current active context (latest).
+     */
+    public function getCurrentAdministrativeUnit()
+    {
+        return $this->master_administrative_unit_id 
+            ? \App\Models\AdministrativeUnit::where('master_administrative_unit_id', $this->master_administrative_unit_id)->latest('id')->first() 
+            : null;
     }
 
     /**

@@ -42,11 +42,16 @@ class UserController extends Controller
             'department_id' => 'nullable|exists:departments,id',
         ]);
 
+        $masterDeptId = null;
+        if ($request->department_id) {
+            $masterDeptId = \App\Models\Department::find($request->department_id)?->master_department_id;
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'department_id' => $request->department_id,
+            'master_department_id' => $masterDeptId,
         ]);
 
         $user->assignRole($request->role);

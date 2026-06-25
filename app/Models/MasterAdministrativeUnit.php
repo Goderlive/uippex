@@ -1,28 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class Department extends Model
+class MasterAdministrativeUnit extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'fiscal_year_id',
         'master_department_id',
         'name',
     ];
-
-    public function fiscalYear(): BelongsTo
-    {
-        return $this->belongsTo(FiscalYear::class);
-    }
 
     public function masterDepartment(): BelongsTo
     {
@@ -34,8 +28,8 @@ class Department extends Model
         return $this->hasMany(AdministrativeUnit::class);
     }
 
-    public function holder(): MorphOne
+    public function users(): HasMany
     {
-        return $this->morphOne(OfficeHolder::class, 'holdable');
+        return $this->hasMany(User::class);
     }
 }
