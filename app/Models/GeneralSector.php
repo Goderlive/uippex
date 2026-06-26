@@ -14,6 +14,7 @@ class GeneralSector extends Model
     
     protected $fillable = [
         'code',
+        'year',
         'name',
     ];
 }

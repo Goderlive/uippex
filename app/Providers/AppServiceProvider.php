@@ -12,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        \Filament\Actions\Imports\Models\Import::polymorphicUserRelationship(true);
+        \Filament\Actions\Exports\Models\Export::polymorphicUserRelationship(true);
     }
 
     /**

@@ -16,9 +16,9 @@ class AdministrativeUnit extends Model
         'fiscal_year_id',
         'department_id',
         'master_administrative_unit_id',
-        'general_sector_code',
-        'auxiliary_sector_code',
-        'budget_project_code',
+        'general_sector_id',
+        'auxiliary_sector_id',
+        'budget_project_id',
         'name',
     ];
 
@@ -37,19 +37,19 @@ class AdministrativeUnit extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function generalSector(): ?GeneralSector
+    public function generalSector(): BelongsTo
     {
-        return GeneralSector::where('code', $this->general_sector_code)->first();
+        return $this->belongsTo(GeneralSector::class, 'general_sector_id');
     }
 
-    public function auxiliarySector(): ?AuxiliarySector
+    public function auxiliarySector(): BelongsTo
     {
-        return AuxiliarySector::where('code', $this->auxiliary_sector_code)->first();
+        return $this->belongsTo(AuxiliarySector::class, 'auxiliary_sector_id');
     }
 
-    public function budgetProject(): ?BudgetProject
+    public function budgetProject(): BelongsTo
     {
-        return BudgetProject::where('code', $this->budget_project_code)->first();
+        return $this->belongsTo(BudgetProject::class, 'budget_project_id');
     }
 
     public function substantiveActivities()

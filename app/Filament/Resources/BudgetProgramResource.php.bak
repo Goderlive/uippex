@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\BudgetProgramResource\Pages;
+use App\Models\BudgetProgram;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class BudgetProgramResource extends Resource
+{
+    protected static ?string $model = BudgetProgram::class;
+
+    public static function getNavigationIcon(): string | \Illuminate\Contracts\Support\Htmlable | null
+    {
+        return 'heroicon-o-rectangle-stack';
+    }
+
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return 'OSFEM Catalogs';
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('code')
+                    ->label('Code')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Select::make('year')
+                    ->label('Fiscal Year')
+                    ->options([
+                        2025 => '2025',
+                        2026 => '2026',
+                        2027 => '2027',
+                    ])
+                    ->default(2026)
+                    ->required(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('code')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('year')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ManageBudgetPrograms::route('/'),
+        ];
+    }
+}

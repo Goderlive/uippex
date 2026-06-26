@@ -14,6 +14,7 @@ class AuxiliarySector extends Model
     
     protected $fillable = [
         'code',
+        'year',
         'name',
     ];
 }

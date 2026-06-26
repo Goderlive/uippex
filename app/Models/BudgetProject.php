@@ -16,7 +16,9 @@ class BudgetProject extends Model
     protected $fillable = [
         'budget_program_id',
         'code',
+        'year',
         'name',
+        'description',
     ];
 
     public function budgetProgram(): BelongsTo

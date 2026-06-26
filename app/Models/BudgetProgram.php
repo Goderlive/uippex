@@ -14,6 +14,13 @@ class BudgetProgram extends Model
 
     protected $fillable = [
         'code',
+        'year',
         'name',
+        'description',
     ];
+
+    public function budgetProjects(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BudgetProject::class);
+    }
 }
