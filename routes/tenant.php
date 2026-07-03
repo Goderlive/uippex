@@ -91,6 +91,11 @@ Route::middleware([
             Route::prefix('areas')->name('areas.')->group(function () {
                 Route::put('/{area}', [App\Http\Controllers\Tenant\DepartmentController::class, 'updateArea'])->name('update');
                 Route::post('/{area}/move', [App\Http\Controllers\Tenant\DepartmentController::class, 'moveArea'])->name('move');
+                
+                Route::get('/{area}/actividades', [App\Http\Controllers\Tenant\AreaActivityController::class, 'index'])->name('activities.index');
+                Route::post('/{area}/actividades', [App\Http\Controllers\Tenant\AreaActivityController::class, 'store'])->name('activities.store');
+                Route::put('/{area}/actividades/{activity}', [App\Http\Controllers\Tenant\AreaActivityController::class, 'update'])->name('activities.update');
+                Route::delete('/{area}/actividades/{activity}', [App\Http\Controllers\Tenant\AreaActivityController::class, 'destroy'])->name('activities.destroy');
             });
         });
 

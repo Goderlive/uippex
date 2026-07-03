@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import DangerButton from '@/Components/DangerButton';
@@ -135,6 +135,12 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
                                                 <li key={area.id} className="flex justify-between items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition duration-150">
                                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words flex-1 pr-4">{area.name}</span>
                                                     <div className="flex items-center space-x-2">
+                                                        <Link
+                                                            href={route('areas.activities.index', area.id)}
+                                                            className="text-xs px-3 py-1.5 rounded bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition font-medium"
+                                                        >
+                                                            Actividades
+                                                        </Link>
                                                         <button
                                                             onClick={() => { setMoveAreaId(area.id); setTargetDeptId(dept.id); }}
                                                             className="text-xs px-3 py-1.5 rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition font-medium"
