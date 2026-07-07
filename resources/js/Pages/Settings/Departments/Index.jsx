@@ -136,7 +136,7 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
                                                     <div className="flex-1 pr-4">
                                                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words">{area.name}</div>
                                                         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                            Sector Gral: <span className="font-semibold">{area.general_sector_id || 'N/A'}</span> &nbsp;|&nbsp; Sector Aux: <span className="font-semibold">{area.auxiliary_sector_id || 'N/A'}</span> &nbsp;|&nbsp; Proyecto: <span className="font-semibold">{area.budget_project_id || 'N/A'}</span>
+                                                            Clave: <span className="font-semibold">{area.general_sector?.code || 'N/A'}</span>|<span className="font-semibold">{area.auxiliary_sector?.code || 'N/A'}</span>|<span className="font-semibold">{area.budget_project?.code || 'N/A'}</span>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center space-x-2">

@@ -18,7 +18,7 @@ class DepartmentController extends Controller
     {
         $activeYearId = FiscalYear::where('is_active', true)->value('id');
         
-        $departments = Department::with('administrativeUnits')
+        $departments = Department::with(['administrativeUnits.generalSector', 'administrativeUnits.auxiliarySector', 'administrativeUnits.budgetProject'])
             ->where('fiscal_year_id', $activeYearId)
             ->get();
             
