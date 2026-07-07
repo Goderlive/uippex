@@ -23,7 +23,10 @@ class UserController extends Controller
 
     public function create()
     {
-        $departments = Department::all();
+        $activeFiscalYear = \App\Models\FiscalYear::where('is_active', true)->first();
+        $departments = $activeFiscalYear 
+            ? Department::where('fiscal_year_id', $activeFiscalYear->id)->get() 
+            : Department::all();
         $roles = Role::where('name', '!=', 'Super-Admin')->get();
 
         return Inertia::render('Users/Create', [

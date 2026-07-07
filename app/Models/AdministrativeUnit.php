@@ -22,6 +22,23 @@ class AdministrativeUnit extends Model
         'name',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($unit) {
+            if (empty($unit->master_administrative_unit_id)) {
+                $dept = $unit->department;
+                $masterDeptId = $dept ? $dept->master_department_id : null;
+
+                $master = \App\Models\MasterAdministrativeUnit::create([
+                    'name' => $unit->name,
+                    'master_department_id' => $masterDeptId,
+                ]);
+                $unit->master_administrative_unit_id = $master->id;
+                $unit->saveQuietly();
+            }
+        });
+    }
+
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);

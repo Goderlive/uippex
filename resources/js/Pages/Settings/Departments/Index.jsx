@@ -133,7 +133,12 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
                                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {dept.administrative_units.map(area => (
                                                 <li key={area.id} className="flex justify-between items-center p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition duration-150">
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words flex-1 pr-4">{area.name}</span>
+                                                    <div className="flex-1 pr-4">
+                                                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words">{area.name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                            Sector Gral: <span className="font-semibold">{area.general_sector_id || 'N/A'}</span> &nbsp;|&nbsp; Sector Aux: <span className="font-semibold">{area.auxiliary_sector_id || 'N/A'}</span> &nbsp;|&nbsp; Proyecto: <span className="font-semibold">{area.budget_project_id || 'N/A'}</span>
+                                                        </div>
+                                                    </div>
                                                     <div className="flex items-center space-x-2">
                                                         <Link
                                                             href={route('areas.activities.index', area.id)}

@@ -103,6 +103,11 @@ export default function ActivitiesIndex({ auth, area, activities, themes, flash 
                         <h2 className="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                             Actividades de: {area.name}
                         </h2>
+                        <div className="text-sm text-gray-500 mt-1 mb-1">
+                            <span className="font-medium">Sector Gral:</span> {area.general_sector_id || 'N/A'} &nbsp;|&nbsp; 
+                            <span className="font-medium">Sector Aux:</span> {area.auxiliary_sector_id || 'N/A'} &nbsp;|&nbsp; 
+                            <span className="font-medium">Proyecto:</span> {area.budget_project_id || 'N/A'}
+                        </div>
                         <div className="text-sm text-gray-500 mt-1">
                             <Link href={route('departments.index')} className="text-indigo-600 hover:underline">Dependencias</Link>
                             {' / '} {area.department?.name || 'Dependencia'} {' / '} Actividades

@@ -19,6 +19,19 @@ class Department extends Model
         'name',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($department) {
+            if (empty($department->master_department_id)) {
+                $master = \App\Models\MasterDepartment::create([
+                    'name' => $department->name
+                ]);
+                $department->master_department_id = $master->id;
+                $department->saveQuietly();
+            }
+        });
+    }
+
     public function fiscalYear(): BelongsTo
     {
         return $this->belongsTo(FiscalYear::class);
