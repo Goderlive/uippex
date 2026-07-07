@@ -9,7 +9,7 @@ import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 
-export default function DepartmentsIndex({ auth, departments, allDepartments, flash }) {
+export default function DepartmentsIndex({ auth, departments, allDepartments, generalSectors, auxiliarySectors, budgetProjects, flash }) {
     const [isCreateModalOpen, setCreateModalOpen] = useState(false);
     
     // Modal states for Departments
@@ -29,12 +29,31 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
         name: '',
     });
 
+    const [isCreateAreaModalOpen, setCreateAreaModalOpen] = useState(false);
+    const { data: createAreaData, setData: setCreateAreaData, post: createAreaPost, processing: createAreaProcessing, errors: createAreaErrors, reset: createAreaReset } = useForm({
+        department_id: '',
+        name: '',
+        general_sector_id: '',
+        auxiliary_sector_id: '',
+        budget_project_id: '',
+    });
+
     const handleCreateDepartment = (e) => {
         e.preventDefault();
         createPost(route('departments.store'), {
             onSuccess: () => {
                 setCreateModalOpen(false);
                 createReset();
+            },
+        });
+    };
+
+    const handleCreateArea = (e) => {
+        e.preventDefault();
+        createAreaPost(route('areas.store'), {
+            onSuccess: () => {
+                setCreateAreaModalOpen(false);
+                createAreaReset();
             },
         });
     };
@@ -110,7 +129,17 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
                                             {dept.administrative_units?.length || 0} Áreas
                                         </span>
                                     </div>
-                                    <div className="flex space-x-2">
+                                    <div className="flex space-x-2 items-center">
+                                        <button
+                                            onClick={() => {
+                                                setCreateAreaData('department_id', dept.id);
+                                                setCreateAreaModalOpen(true);
+                                            }}
+                                            className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 px-3 py-1.5 rounded transition font-medium mr-2"
+                                            title="Crear Nueva Área"
+                                        >
+                                            + Nueva Área
+                                        </button>
                                         <button
                                             onClick={() => { setEditDeptId(dept.id); setEditDeptName(dept.name); }}
                                             className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
@@ -192,6 +221,80 @@ export default function DepartmentsIndex({ auth, departments, allDepartments, fl
                     <div className="mt-6 flex justify-end gap-3">
                         <SecondaryButton onClick={() => setCreateModalOpen(false)}>Cancelar</SecondaryButton>
                         <PrimaryButton disabled={createProcessing}>Crear</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Create Area Modal */}
+            <Modal show={isCreateAreaModalOpen} onClose={() => setCreateAreaModalOpen(false)}>
+                <form onSubmit={handleCreateArea} className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Crear Nueva Área (Unidad Administrativa)</h2>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <InputLabel htmlFor="area_name" value="Nombre del Área" />
+                            <TextInput
+                                id="area_name"
+                                className="mt-1 block w-full"
+                                value={createAreaData.name}
+                                onChange={(e) => setCreateAreaData('name', e.target.value)}
+                                isFocused
+                            />
+                            <InputError message={createAreaErrors.name} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="general_sector_id" value="Sector General" />
+                            <select
+                                id="general_sector_id"
+                                className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                value={createAreaData.general_sector_id}
+                                onChange={(e) => setCreateAreaData('general_sector_id', e.target.value)}
+                            >
+                                <option value="">Selecciona un Sector General</option>
+                                {generalSectors.map(sector => (
+                                    <option key={sector.id} value={sector.id}>[{sector.code}] {sector.name}</option>
+                                ))}
+                            </select>
+                            <InputError message={createAreaErrors.general_sector_id} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="auxiliary_sector_id" value="Sector Auxiliar" />
+                            <select
+                                id="auxiliary_sector_id"
+                                className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                value={createAreaData.auxiliary_sector_id}
+                                onChange={(e) => setCreateAreaData('auxiliary_sector_id', e.target.value)}
+                            >
+                                <option value="">Selecciona un Sector Auxiliar</option>
+                                {auxiliarySectors.map(sector => (
+                                    <option key={sector.id} value={sector.id}>[{sector.code}] {sector.name}</option>
+                                ))}
+                            </select>
+                            <InputError message={createAreaErrors.auxiliary_sector_id} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="budget_project_id" value="Proyecto Presupuestario" />
+                            <select
+                                id="budget_project_id"
+                                className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                value={createAreaData.budget_project_id}
+                                onChange={(e) => setCreateAreaData('budget_project_id', e.target.value)}
+                            >
+                                <option value="">Selecciona un Proyecto Presupuestario</option>
+                                {budgetProjects.map(project => (
+                                    <option key={project.id} value={project.id}>[{project.code}] {project.name}</option>
+                                ))}
+                            </select>
+                            <InputError message={createAreaErrors.budget_project_id} className="mt-2" />
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton onClick={() => setCreateAreaModalOpen(false)}>Cancelar</SecondaryButton>
+                        <PrimaryButton disabled={createAreaProcessing}>Crear</PrimaryButton>
                     </div>
                 </form>
             </Modal>

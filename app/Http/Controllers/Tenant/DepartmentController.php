@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\AdministrativeUnit;
 use App\Models\FiscalYear;
+use App\Models\GeneralSector;
+use App\Models\AuxiliarySector;
+use App\Models\BudgetProject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,7 +19,9 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $activeYearId = FiscalYear::where('is_active', true)->value('id');
+        $activeYear = FiscalYear::where('is_active', true)->first();
+        $activeYearId = $activeYear ? $activeYear->id : null;
+        $activeYearValue = $activeYear ? $activeYear->year : date('Y');
         
         $departments = Department::with(['administrativeUnits.generalSector', 'administrativeUnits.auxiliarySector', 'administrativeUnits.budgetProject'])
             ->where('fiscal_year_id', $activeYearId)
@@ -24,9 +29,16 @@ class DepartmentController extends Controller
             
         $allDepartments = Department::where('fiscal_year_id', $activeYearId)->get();
 
+        $generalSectors = GeneralSector::where('year', $activeYearValue)->get();
+        $auxiliarySectors = AuxiliarySector::where('year', $activeYearValue)->get();
+        $budgetProjects = BudgetProject::where('year', $activeYearValue)->get();
+
         return Inertia::render('Settings/Departments/Index', [
             'departments' => $departments,
             'allDepartments' => $allDepartments,
+            'generalSectors' => $generalSectors,
+            'auxiliarySectors' => $auxiliarySectors,
+            'budgetProjects' => $budgetProjects,
         ]);
     }
 
@@ -81,6 +93,37 @@ class DepartmentController extends Controller
         $department->delete();
 
         return redirect()->back()->with('message', 'Dependencia eliminada.');
+    }
+
+    /**
+     * Store a new Area (AdministrativeUnit)
+     */
+    public function storeArea(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'name' => 'required|string|max:255',
+            'general_sector_id' => ['required', \Illuminate\Validation\Rule::exists(\App\Models\GeneralSector::class, 'id')],
+            'auxiliary_sector_id' => ['required', \Illuminate\Validation\Rule::exists(\App\Models\AuxiliarySector::class, 'id')],
+            'budget_project_id' => ['required', \Illuminate\Validation\Rule::exists(\App\Models\BudgetProject::class, 'id')],
+        ]);
+
+        $activeYearId = FiscalYear::where('is_active', true)->value('id');
+
+        if (!$activeYearId) {
+            return redirect()->back()->with('error', 'No hay un año fiscal activo.');
+        }
+
+        AdministrativeUnit::create([
+            'department_id' => $request->department_id,
+            'name' => $request->name,
+            'general_sector_id' => $request->general_sector_id,
+            'auxiliary_sector_id' => $request->auxiliary_sector_id,
+            'budget_project_id' => $request->budget_project_id,
+            'fiscal_year_id' => $activeYearId,
+        ]);
+
+        return redirect()->back()->with('message', 'Área creada exitosamente.');
     }
     
     /**

@@ -89,6 +89,7 @@ Route::middleware([
             });
             
             Route::prefix('areas')->name('areas.')->group(function () {
+                Route::post('/', [App\Http\Controllers\Tenant\DepartmentController::class, 'storeArea'])->name('store');
                 Route::put('/{area}', [App\Http\Controllers\Tenant\DepartmentController::class, 'updateArea'])->name('update');
                 Route::post('/{area}/move', [App\Http\Controllers\Tenant\DepartmentController::class, 'moveArea'])->name('move');
                 
