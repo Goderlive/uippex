@@ -21,9 +21,9 @@ export default function Index({ auth, users }) {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                        <div className="p-6 text-gray-900 dark:text-gray-100">
+                        <div className="p-6 text-gray-900 dark:text-gray-100 overflow-x-auto">
                             
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left border-collapse min-w-max">
                                 <thead>
                                     <tr className="border-b dark:border-gray-700 uppercase text-xs text-gray-500 dark:text-gray-400">
                                         <th className="px-4 py-3">Nombre</th>
@@ -52,7 +52,7 @@ export default function Index({ auth, users }) {
                                                 {user.department?.name || <span className="italic text-gray-400">— Central —</span>}
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                <Link className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium">Editar</Link>
+                                                <Link href={route('users.edit', user.id)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium">Editar</Link>
                                             </td>
                                         </tr>
                                     ))}
