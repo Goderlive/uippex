@@ -28,7 +28,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
     const openReportModal = (activity) => {
         setSelectedActivity(activity);
         setData({
-            reported_value: activity.current_report ? activity.current_report.reported_value : '',
+            reported_value: activity.current_report ? parseInt(activity.current_report.reported_value, 10) : '',
             evidence: null,
             month: current_month,
             observations: activity.current_report ? (activity.current_report.observations || '') : '',
@@ -134,7 +134,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
                                     statusText = can_validate ? 'Auditar Registro' : 'En Revisión (Pendiente)';
                                 } else if (report.status === 1) {
                                     statusColor = 'bg-green-600';
-                                    statusText = `Validado [ ${report.reported_value} ]`;
+                                    statusText = `Validado [ ${parseInt(report.reported_value, 10)} ]`;
                                 }
                             }
 
@@ -320,7 +320,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-bold mb-1">Valor Reportado</p>
-                                    <p className="text-3xl font-black text-indigo-700 dark:text-indigo-300">{selectedActivity?.current_report?.reported_value}</p>
+                                    <p className="text-3xl font-black text-indigo-700 dark:text-indigo-300">{selectedActivity?.current_report ? parseInt(selectedActivity.current_report.reported_value, 10) : ''}</p>
                                 </div>
                             </div>
 

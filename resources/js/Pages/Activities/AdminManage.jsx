@@ -45,7 +45,7 @@ export default function AdminManage({ auth, activities, filters, flash }) {
         setEditingActivity(activity);
         const schedule = activity.monthly_schedule;
         const initial = {};
-        MONTH_KEYS.forEach(k => { initial[k] = schedule ? schedule[k] ?? 0 : 0; });
+        MONTH_KEYS.forEach(k => { initial[k] = schedule ? parseInt(schedule[k] ?? 0, 10) : 0; });
         setData(initial);
         clearErrors();
         setIsModalOpen(true);
