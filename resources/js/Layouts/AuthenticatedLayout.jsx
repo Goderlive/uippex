@@ -9,6 +9,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const { auth, premiumFeatures } = usePage().props;
     const user = auth.user;
     const isAdmin = user.roles?.some(r => r.name === 'Super-Admin');
+    const canAccessSettings = user.roles?.some(r => r.name === 'Super-Admin' || r.name === 'PMD-Planeación');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -113,9 +114,16 @@ export default function AuthenticatedLayout({ header, children }) {
                                             </Dropdown.Trigger>
 
                                             <Dropdown.Content>
-                                                <Dropdown.Link href={route('departments.index') ?? '#'}>
-                                                    Dependencias
-                                                </Dropdown.Link>
+                                                {canAccessSettings && (
+                                                    <>
+                                                        <Dropdown.Link href={route('downloads.index')}>
+                                                            Descargas
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link href={route('departments.index') ?? '#'}>
+                                                            Dependencias
+                                                        </Dropdown.Link>
+                                                    </>
+                                                )}
                                                 <Dropdown.Link href={route('directory.index')}>
                                                     Nombres
                                                 </Dropdown.Link>
@@ -269,12 +277,22 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Indicadores
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('departments.index') ?? '#'}
-                            active={route().current('departments.*')}
-                        >
-                            Ajustes: Dependencias
-                        </ResponsiveNavLink>
+                        {canAccessSettings && (
+                            <>
+                                <ResponsiveNavLink
+                                    href={route('downloads.index')}
+                                    active={route().current('downloads.*')}
+                                >
+                                    Ajustes: Descargas
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('departments.index') ?? '#'}
+                                    active={route().current('departments.*')}
+                                >
+                                    Ajustes: Dependencias
+                                </ResponsiveNavLink>
+                            </>
+                        )}
                         <ResponsiveNavLink
                             href={route('directory.index')}
                             active={route().current('directory.*')}

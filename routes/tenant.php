@@ -81,6 +81,11 @@ Route::middleware([
 
         // Ajustes (Role: Super-Admin & PMD-Planeación)
         Route::middleware(['role:Super-Admin|PMD-Planeación'])->prefix('ajustes')->group(function () {
+            Route::prefix('descargas')->name('downloads.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Tenant\ExportController::class, 'index'])->name('index');
+                Route::get('/actividades', [\App\Http\Controllers\Tenant\ExportController::class, 'exportActivities'])->name('activities');
+            });
+
             Route::prefix('dependencias')->name('departments.')->group(function () {
                 Route::get('/', [App\Http\Controllers\Tenant\DepartmentController::class, 'index'])->name('index');
                 Route::post('/', [App\Http\Controllers\Tenant\DepartmentController::class, 'store'])->name('store');

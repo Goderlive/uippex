@@ -183,7 +183,15 @@ class ActivityWorkflowController extends Controller
             'status' => 0, 
         ];
 
-        if ($request->hasFile('evidence')) {
+        if ($request->reported_value == 0 || $request->boolean('delete_evidence')) {
+            if ($existing && $existing->evidence_path) {
+                Storage::disk('public')->delete($existing->evidence_path);
+            }
+            $data['evidence_path'] = null;
+        } else if ($request->hasFile('evidence')) {
+            if ($existing && $existing->evidence_path) {
+                Storage::disk('public')->delete($existing->evidence_path);
+            }
             $data['evidence_path'] = $request->file('evidence')->store("evidencias/{$month}", 'public');
         }
 

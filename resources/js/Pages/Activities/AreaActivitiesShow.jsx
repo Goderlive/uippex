@@ -22,6 +22,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
         evidence: null,
         month: current_month,
         observations: '',
+        delete_evidence: false,
     });
 
     const openReportModal = (activity) => {
@@ -31,6 +32,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
             evidence: null,
             month: current_month,
             observations: activity.current_report ? (activity.current_report.observations || '') : '',
+            delete_evidence: false,
         });
         setIsModalOpen(true);
     };
@@ -258,6 +260,44 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
                                     />
                                     <InputError message={errors.evidence} className="mt-2" />
                                 </div>
+
+                                {selectedActivity?.current_report?.evidence_url && !data.delete_evidence && selectedActivity?.current_report?.status !== 1 && (
+                                    <div className="mt-4 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="h-10 w-10 overflow-hidden rounded bg-gray-200 flex items-center justify-center">
+                                                {selectedActivity.current_report.evidence_path.toLowerCase().endsWith('.pdf') ? (
+                                                    <span className="text-xs font-bold text-red-500">PDF</span>
+                                                ) : (
+                                                    <img src={selectedActivity.current_report.evidence_url} className="h-full w-full object-cover" />
+                                                )}
+                                            </div>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Evidencia actual guardada</span>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setData('delete_evidence', true)}
+                                            className="text-red-500 hover:text-red-700 p-2 transition-colors"
+                                            title="Eliminar evidencia"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {data.delete_evidence && selectedActivity?.current_report?.status !== 1 && (
+                                    <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg flex items-center justify-between">
+                                        <span>La evidencia actual será eliminada al guardar.</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setData('delete_evidence', false)} 
+                                            className="underline font-bold hover:text-red-800"
+                                        >
+                                            Deshacer
+                                        </button>
+                                    </div>
+                                )}
 
                                 <div className="flex items-center justify-end mt-8">
                                     <SecondaryButton onClick={closeModal} className="mr-3">
