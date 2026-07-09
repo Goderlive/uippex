@@ -163,7 +163,7 @@ export default function ActivitiesIndex({ auth, area, activities, themes, flash 
                                     const isEditing = editingActivityId === activity.id;
                                     const s = activity.monthly_schedule || {};
                                     const total = isEditing && editData.schedule
-                                        ? months.reduce((acc, m) => acc + (parseFloat(editData.schedule[`${m}_programmed`]) || 0), 0)
+                                        ? months.reduce((acc, m) => acc + (parseInt(editData.schedule[`${m}_programmed`], 10) || 0), 0)
                                         : activity.annual_target;
 
                                     return (
@@ -215,7 +215,7 @@ export default function ActivitiesIndex({ auth, area, activities, themes, flash 
                                                         <input 
                                                             type="number" 
                                                             min="0"
-                                                            step="0.01"
+                                                            step="1"
                                                             className="w-16 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-xs p-1 text-center hide-arrows"
                                                             value={editData.schedule[`${m}_programmed`]}
                                                             onChange={e => handleScheduleChange(m, e.target.value)}

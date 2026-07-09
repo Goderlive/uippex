@@ -65,7 +65,7 @@ export default function AdminManage({ auth, activities, filters, flash }) {
         });
     };
 
-    const annualTotal = MONTH_KEYS.reduce((sum, k) => sum + (parseFloat(data[k]) || 0), 0);
+    const annualTotal = MONTH_KEYS.reduce((sum, k) => sum + (parseInt(data[k], 10) || 0), 0);
 
     return (
         <AuthenticatedLayout
@@ -207,7 +207,7 @@ export default function AdminManage({ auth, activities, filters, flash }) {
                                         min="0"
                                         className="mt-1 block w-full text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
                                         value={data[key]}
-                                        onChange={(e) => setData(key, parseFloat(e.target.value) || 0)}
+                                        onChange={(e) => setData(key, parseInt(e.target.value, 10) || 0)}
                                     />
                                     <InputError message={errors[key]} className="mt-1" />
                                 </div>
@@ -216,7 +216,7 @@ export default function AdminManage({ auth, activities, filters, flash }) {
 
                         <div className="mt-4 pt-3 border-t border-gray-100 text-center">
                             <span className="text-sm text-gray-500">Meta Anual Resultante: </span>
-                            <span className="text-lg font-bold text-indigo-700">{annualTotal.toFixed(2)}</span>
+                            <span className="text-lg font-bold text-indigo-700">{annualTotal}</span>
                         </div>
 
                         <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end space-x-3">

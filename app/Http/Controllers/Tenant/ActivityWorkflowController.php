@@ -171,7 +171,7 @@ class ActivityWorkflowController extends Controller
 
         $request->validate([
             'month' => 'required|integer|min:1|max:12',
-            'reported_value' => 'required|numeric|min:0',
+            'reported_value' => 'required|integer|min:0',
             'evidence' => 'nullable|image|mimes:jpg,jpeg,png|max:3048',
         ]);
 
@@ -479,18 +479,18 @@ class ActivityWorkflowController extends Controller
     public function adminUpdateSchedule(Request $request, \App\Models\ActivityMonthlySchedule $schedule)
     {
         $validated = $request->validate([
-            'jan_programmed' => 'required|numeric|min:0',
-            'feb_programmed' => 'required|numeric|min:0',
-            'mar_programmed' => 'required|numeric|min:0',
-            'apr_programmed' => 'required|numeric|min:0',
-            'may_programmed' => 'required|numeric|min:0',
-            'jun_programmed' => 'required|numeric|min:0',
-            'jul_programmed' => 'required|numeric|min:0',
-            'aug_programmed' => 'required|numeric|min:0',
-            'sep_programmed' => 'required|numeric|min:0',
-            'oct_programmed' => 'required|numeric|min:0',
-            'nov_programmed' => 'required|numeric|min:0',
-            'dec_programmed' => 'required|numeric|min:0',
+            'jan_programmed' => 'required|integer|min:0',
+            'feb_programmed' => 'required|integer|min:0',
+            'mar_programmed' => 'required|integer|min:0',
+            'apr_programmed' => 'required|integer|min:0',
+            'may_programmed' => 'required|integer|min:0',
+            'jun_programmed' => 'required|integer|min:0',
+            'jul_programmed' => 'required|integer|min:0',
+            'aug_programmed' => 'required|integer|min:0',
+            'sep_programmed' => 'required|integer|min:0',
+            'oct_programmed' => 'required|integer|min:0',
+            'nov_programmed' => 'required|integer|min:0',
+            'dec_programmed' => 'required|integer|min:0',
         ]);
 
         $schedule->update($validated);

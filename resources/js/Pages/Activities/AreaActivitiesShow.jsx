@@ -238,6 +238,7 @@ export default function AreaActivitiesShow({ unit, activities, current_month, ca
                                     <TextInput
                                         id="reported_value"
                                         type="number"
+                                        step="1"
                                         className="mt-1 block w-full"
                                         value={data.reported_value}
                                         onChange={(e) => setData('reported_value', e.target.value)}

@@ -58,7 +58,7 @@ export default function Builder({ reconduction, available_activities, can_edit, 
 
     const handleScheduleChange = (itemIndex, monthKey, value) => {
         const valStr = value === '' ? '0' : value;
-        const numValue = parseFloat(valStr) || 0;
+        const numValue = parseInt(valStr, 10) || 0;
 
         const newItems = [...draftItems];
         const item = newItems[itemIndex];
