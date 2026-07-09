@@ -339,14 +339,14 @@ class ActivityWorkflowController extends Controller
                     $actPercent = ($actRep / $actProg) * 100;
                 }
 
-                $activity->setAttribute('trimestral_compliance_percent', number_format(min($actPercent, 100), 2));
+                $activity->setAttribute('trimestral_compliance_percent', number_format($actPercent, 2));
             }
         }
 
         if ($globalProg == 0) {
             $departmentGlobalPercentage = "100.00";
         } else {
-            $departmentGlobalPercentage = number_format(min(($globalRep / $globalProg) * 100, 100), 2);
+            $departmentGlobalPercentage = number_format(($globalRep / $globalProg) * 100, 2);
         }
 
         $config = \App\Models\MunicipalConfiguration::getSettings();
@@ -423,7 +423,7 @@ class ActivityWorkflowController extends Controller
                     $actPercent = ($actRep / $actProg) * 100;
                 }
 
-                $activity->setAttribute('trimestral_compliance_percent', number_format(min($actPercent, 100), 2));
+                $activity->setAttribute('trimestral_compliance_percent', number_format($actPercent, 2));
             }
         }
 
